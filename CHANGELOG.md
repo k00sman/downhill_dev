@@ -11,6 +11,44 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **Bike terrain contact stability** — 2026-06-23
+  - Added controlled downhill tangent-following with capped upward grounded
+    velocity to reduce steep-slope pops.
+  - Added multi-point ground probing so continuous slopes and smooth bumps
+    produce steadier ground normals.
+  - Added visual terrain pitch on `BikeBody` while keeping the root Rigidbody
+    rotation-frozen.
+  - Tightened the root collider into a compact contact proxy so steep-slope
+    changes are less likely to pop the bike off terrain.
+
+- **Player bike yaw drift before steering** — 2026-06-23
+  - Locked runtime Rigidbody yaw along with pitch and roll until steering owns
+    bike rotation, preventing physics contact from turning the bike sideways or
+    uphill and causing the forward movement model to clamp speed to zero.
+  - Removed leftover movement debug logs from the normal riding path.
+
+- **Bike stopping on small rises** — 2026-06-23
+  - Reduced default forward-movement drag and slope-drive gain so lower-speed
+    momentum carries over shallow trail undulations without runaway acceleration
+    on smooth descents.
+  - Changed movement math to preserve horizontal forward momentum across
+    changing smooth ground normals, avoiding artificial speed loss or gain from
+    minor bumps.
+  - Stopped the grounded movement model from injecting vertical velocity on
+    steep slopes, reducing terrain-contact pops while still using slope angle
+    for forward acceleration.
+
+- **Downhill forward movement model** (Ticket 2.1) — 2026-06-22
+  - Added `BikeMovementModel`, a serializable pure movement model that blends
+    gravity along the slope, pedal acceleration, drag, and a speed cap for
+    straight-ahead downhill rolling.
+  - Wired the player bike controller to sample ground, accumulate decaying pedal
+    power from left/right pedal input, drive Rigidbody velocity while grounded,
+    and expose grounded/pedal seams for tuning and tests.
+  - Added EditMode coverage for the movement math and PlayMode coverage for
+    flat-ground drag, downhill acceleration, and pedalled acceleration, plus the
+    Ticket 2.1 design spec and implementation plan docs.
+
 - **Player bicycle root actor** (Ticket 1.2) — 2026-06-22
   - Restructured `PFB_Player.prefab` into a dynamic-Rigidbody actor: root carries
     `Rigidbody` + `BoxCollider` + `PlayerInputReader` + `PlayerBikeController` and

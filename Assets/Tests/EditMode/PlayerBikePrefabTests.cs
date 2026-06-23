@@ -39,6 +39,17 @@ public class PlayerBikePrefabTests
         Assert.AreEqual(1, colliders.Length, "Expected exactly one collider, on the root");
     }
 
+    [Test]
+    public void RootCollider_IsCompactContactProxy()
+    {
+        var box = _prefab.GetComponent<BoxCollider>();
+        Assert.IsNotNull(box, "BoxCollider missing on root");
+        Assert.LessOrEqual(box.size.z, 1.25f,
+            "Root contact proxy should be compact enough to avoid bridging steep slope changes.");
+        Assert.LessOrEqual(box.size.y, 0.8f,
+            "Root contact proxy should not be a tall visible-bike-sized box.");
+    }
+
     [TestCase("BikeBody")]
     [TestCase("CameraPivot")]
     [TestCase("GroundCheck")]

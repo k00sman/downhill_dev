@@ -87,7 +87,7 @@ PFB_Player          tag: Player
 - `references`: `["Downhill.Input"]`
 - `autoReferenced`: `true`
 
-Gameplay code gets its own focused assembly (per CLAUDE.md), and this keeps the
+Gameplay code gets its own focused assembly (per AGENTS.md), and this keeps the
 controller testable from the test assemblies without referencing
 `Assembly-CSharp`.
 

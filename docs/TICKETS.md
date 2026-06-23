@@ -34,6 +34,8 @@ The work should be done in this order so that dependencies stay clear and each s
 
 ### Ticket 1.1 - Create gameplay control map
 
+**Status:** Completed.
+
 **Goal:** Define the prototype control bindings in one place.
 
 **Dependencies:** None.
@@ -60,6 +62,8 @@ The work should be done in this order so that dependencies stay clear and each s
 
 ### Ticket 1.2 - Create player bicycle root actor
 
+**Status:** Completed.
+
 **Goal:** Establish the object hierarchy for the controllable bicycle and rider.
 
 **Dependencies:** Ticket 1.1.
@@ -85,6 +89,8 @@ The work should be done in this order so that dependencies stay clear and each s
 
 ### Ticket 2.1 - Implement downhill forward movement model
 
+**Status:** Completed.
+
 **Goal:** Make the bicycle move forward using gravity plus pedal input.
 
 **Dependencies:** Tickets 1.1 and 1.2.
@@ -109,6 +115,10 @@ The work should be done in this order so that dependencies stay clear and each s
 **Notes:**
 - Do not implement turning here.
 - Favor feel and tuning speed over realism.
+- Terrain-driven left/right curve following is intentionally deferred to Ticket
+  3.1. Ticket 2.1 keeps the bike root rotation frozen and only owns forward
+  speed/contact stability; curved or banked slope steering needs an explicit
+  heading/yaw model so terrain normals do not create noisy implicit turns.
 
 ### Ticket 2.2 - Implement alternating pedal input logic
 
@@ -158,6 +168,9 @@ The work should be done in this order so that dependencies stay clear and each s
 - Left/right input turns the bicycle reliably.
 - Steering feels controllable at low-to-medium speed.
 - No extreme oscillation or instant 180-degree snapping occurs.
+- Banked or curved downhill terrain can influence heading through the steering
+  model, so the bike naturally follows readable slope curves instead of driving
+  straight through them.
 
 ### Ticket 3.2 - Add speed-sensitive steering
 
@@ -534,13 +547,13 @@ The fastest route to a playable downhill prototype is a narrow horizontal slice,
 
 Recommended first sprint:
 
-1. Ticket 1.1 - Create gameplay control map
-2. Ticket 1.2 - Create player bicycle root actor
-3. Ticket 2.1 - Implement downhill forward movement model
-4. Ticket 3.1 - Implement steering input pipeline
-5. Ticket 3.4 - Implement chase camera and freelook
-6. Ticket 3.3 - Implement split braking
-7. Ticket 7.2 - Add gameplay debug HUD
+1. [x] Ticket 1.1 - Create gameplay control map
+2. [x] Ticket 1.2 - Create player bicycle root actor
+3. [x] Ticket 2.1 - Implement downhill forward movement model
+4. [ ] Ticket 3.1 - Implement steering input pipeline
+5. [ ] Ticket 3.4 - Implement chase camera and freelook
+6. [ ] Ticket 3.3 - Implement split braking
+7. [ ] Ticket 7.2 - Add gameplay debug HUD
 
 That sprint should answer the first crucial question: is simply riding the existing segment already interesting before adding monster pressure, crashes, or health systems?
 
