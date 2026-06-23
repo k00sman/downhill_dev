@@ -1,0 +1,59 @@
+{
+    "name": "DownhillControls",
+    "maps": [
+        {
+            "name": "Bike",
+            "id": "a1111111-1111-4111-8111-111111111111",
+            "actions": [
+                { "name": "PedalLeft",  "type": "Button", "id": "a2000001-0000-4000-8000-000000000001", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "PedalRight", "type": "Button", "id": "a2000002-0000-4000-8000-000000000002", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "FrontBrake", "type": "Value",  "id": "a2000003-0000-4000-8000-000000000003", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "RearBrake",  "type": "Value",  "id": "a2000004-0000-4000-8000-000000000004", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "Turn",       "type": "Value",  "id": "a2000005-0000-4000-8000-000000000005", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "Jump",       "type": "Button", "id": "a2000006-0000-4000-8000-000000000006", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "Freelook",   "type": "Value",  "id": "a2000007-0000-4000-8000-000000000007", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true }
+            ],
+            "bindings": [
+                { "name": "", "id": "b0000001-0000-4000-8000-000000000001", "path": "<Keyboard>/leftArrow",  "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "PedalLeft",  "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000002-0000-4000-8000-000000000002", "path": "<Gamepad>/leftShoulder", "interactions": "", "processors": "", "groups": "Gamepad",        "action": "PedalLeft",  "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b0000003-0000-4000-8000-000000000003", "path": "<Keyboard>/rightArrow", "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "PedalRight", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000004-0000-4000-8000-000000000004", "path": "<Gamepad>/rightShoulder","interactions": "", "processors": "", "groups": "Gamepad",        "action": "PedalRight", "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b0000005-0000-4000-8000-000000000005", "path": "<Mouse>/rightButton",   "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "FrontBrake", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000006-0000-4000-8000-000000000006", "path": "<Gamepad>/rightTrigger","interactions": "", "processors": "", "groups": "Gamepad",        "action": "FrontBrake", "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b0000007-0000-4000-8000-000000000007", "path": "<Keyboard>/leftShift",  "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "RearBrake",  "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000008-0000-4000-8000-000000000008", "path": "<Gamepad>/leftTrigger", "interactions": "", "processors": "", "groups": "Gamepad",        "action": "RearBrake",  "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "1D Axis", "id": "b0000009-0000-4000-8000-000000000009", "path": "1DAxis", "interactions": "", "processors": "", "groups": "", "action": "Turn", "isComposite": true, "isPartOfComposite": false },
+                { "name": "negative", "id": "b000000a-0000-4000-8000-00000000000a", "path": "<Keyboard>/a", "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "Turn", "isComposite": false, "isPartOfComposite": true },
+                { "name": "positive", "id": "b000000b-0000-4000-8000-00000000000b", "path": "<Keyboard>/d", "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "Turn", "isComposite": false, "isPartOfComposite": true },
+                { "name": "", "id": "b000000c-0000-4000-8000-00000000000c", "path": "<Gamepad>/leftStick/x", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Turn", "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b000000d-0000-4000-8000-00000000000d", "path": "<Keyboard>/space",     "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "Jump", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b000000e-0000-4000-8000-00000000000e", "path": "<Gamepad>/buttonSouth","interactions": "", "processors": "", "groups": "Gamepad",        "action": "Jump", "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b000000f-0000-4000-8000-00000000000f", "path": "<Mouse>/delta",        "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "Freelook", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000010-0000-4000-8000-000000000010", "path": "<Gamepad>/rightStick", "interactions": "", "processors": "", "groups": "Gamepad",        "action": "Freelook", "isComposite": false, "isPartOfComposite": false }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard&Mouse",
+            "bindingGroup": "Keyboard&Mouse",
+            "devices": [
+                { "devicePath": "<Keyboard>", "isOptional": false, "isOR": false },
+                { "devicePath": "<Mouse>",    "isOptional": false, "isOR": false }
+            ]
+        },
+        {
+            "name": "Gamepad",
+            "bindingGroup": "Gamepad",
+            "devices": [
+                { "devicePath": "<Gamepad>", "isOptional": false, "isOR": false }
+            ]
+        }
+    ]
+}
