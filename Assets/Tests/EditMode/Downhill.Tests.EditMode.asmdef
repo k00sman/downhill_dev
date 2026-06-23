@@ -4,7 +4,9 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Downhill.Input",
+        "Downhill.Player"
     ],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],

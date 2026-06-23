@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "Unity.InputSystem",
         "Unity.InputSystem.TestFramework",
-        "Downhill.Input"
+        "Downhill.Input",
+        "Downhill.Player"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

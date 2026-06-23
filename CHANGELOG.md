@@ -11,6 +11,20 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **Player bicycle root actor** (Ticket 1.2) — 2026-06-22
+  - Restructured `PFB_Player.prefab` into a dynamic-Rigidbody actor: root carries
+    `Rigidbody` + `BoxCollider` + `PlayerInputReader` + `PlayerBikeController` and
+    is tagged `Player`. The bike mesh now sits under a `BikeBody` lean pivot, with
+    `CameraPivot`, `GroundCheck`, and `RecoveryAnchor` anchor transforms for later
+    camera, grounding, and crash-recovery work.
+  - Added the `Downhill.Player` assembly and `PlayerBikeController`, a wiring/
+    validation shell exposing the actor's references and a read-only `BikeState`
+    (Riding/Crashed/Recovering) stub. It auto-wires same-object components and
+    logs a named error for any missing link, so the scene runs without
+    null-reference errors. No movement logic yet.
+  - Added EditMode (prefab structure + serialized-reference wiring) and PlayMode
+    (instantiate-and-validate) tests.
+
 - **Gameplay control map** (Ticket 1.1) — 2026-06-22
   - Added the Unity Input System package (`com.unity.inputsystem` 1.19.0). Set
     Active Input Handling to "Both" (legacy + new) so existing third-party demo
