@@ -16,10 +16,10 @@ RenderSettings:
   serializedVersion: 10
   m_Fog: 1
   m_FogColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
-  m_FogMode: 3
-  m_FogDensity: 0.122
+  m_FogMode: 1
+  m_FogDensity: 0.054
   m_LinearFogStart: 0
-  m_LinearFogEnd: 300
+  m_LinearFogEnd: 41.79
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -27,7 +27,7 @@ RenderSettings:
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: c400449812c84ce429be674216166273, type: 2}
-  m_HaloStrength: 0.5
+  m_HaloStrength: 0.324
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &6184304 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6050585835675226780, guid: 7ff6efa3c1b585e46bb233f396a7119e, type: 3}
+  m_PrefabInstance: {fileID: 6882638996175333503}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &166909080
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -440,6 +445,69 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &414354715
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 414354717}
+  - component: {fileID: 414354716}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &414354716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414354715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 690d858b6cbfb2e40b65c1999ba36cc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnvironmentScatter.EnvironmentScatterManager
+  zones:
+  - {fileID: 2145292005}
+  scatterBounds:
+    serializedVersion: 2
+    x: -100
+    y: -38.7
+    width: 200
+    height: 200
+  unityTerrains:
+  - {fileID: 1928605379}
+  meshTerrainColliders:
+  - {fileID: 1928605378}
+  meshTerrainLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  globalMinSpacing: 1.5
+  yOffset: 0
+  yRotationRange: {x: 0, y: 360}
+  scatterRoot: {fileID: 0}
+--- !u!4 &414354717
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414354715}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &584211241
 GameObject:
   m_ObjectHideFlags: 0
@@ -507,7 +575,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.821
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
@@ -567,6 +635,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &719180376 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 503815311156663054, guid: 1841d20929a654146a70ef220bd8ea93, type: 3}
+  m_PrefabInstance: {fileID: 1704887874}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +689,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1637632199 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8214844905391416423, guid: 6897431e0e72bc245807a0c2cde6f046, type: 3}
+  m_PrefabInstance: {fileID: 8114539694018343539}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1704887874
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -634,7 +712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2520455861069961941, guid: 1841d20929a654146a70ef220bd8ea93, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.223
       objectReference: {fileID: 0}
     - target: {fileID: 2520455861069961941, guid: 1841d20929a654146a70ef220bd8ea93, type: 3}
       propertyPath: m_LocalPosition.z
@@ -673,6 +751,225 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1841d20929a654146a70ef220bd8ea93, type: 3}
+--- !u!1 &1737698513 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7182005748407476243, guid: bc4fcb24f4666b0448f46c6d6df16c19, type: 3}
+  m_PrefabInstance: {fileID: 97917995747334580}
+  m_PrefabAsset: {fileID: 0}
+--- !u!154 &1928605378 stripped
+TerrainCollider:
+  m_CorrespondingSourceObject: {fileID: 8612967945557014164, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
+  m_PrefabInstance: {fileID: 7252594276219731357}
+  m_PrefabAsset: {fileID: 0}
+--- !u!218 &1928605379 stripped
+Terrain:
+  m_CorrespondingSourceObject: {fileID: 4965104449362560418, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
+  m_PrefabInstance: {fileID: 7252594276219731357}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2145292004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2145292007}
+  - component: {fileID: 2145292006}
+  - component: {fileID: 2145292005}
+  m_Layer: 0
+  m_Name: Spline
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2145292005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145292004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ce233822926bc7478b0c0cf61cabe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnvironmentScatter.SplineZone
+  zoneType: 1
+  minSpacing: 1.5
+  assets:
+  - prefab: {fileID: 719180376}
+    weight: 79.8
+    minScaleMultiplier: 0
+    maxScaleMultiplier: 0
+  - prefab: {fileID: 1637632199}
+    weight: 40.7
+    minScaleMultiplier: 0
+    maxScaleMultiplier: 0
+  - prefab: {fileID: 6184304}
+    weight: 65.4
+    minScaleMultiplier: 0
+    maxScaleMultiplier: 0
+  - prefab: {fileID: 1737698513}
+    weight: 25.5
+    minScaleMultiplier: 0
+    maxScaleMultiplier: 0
+--- !u!114 &2145292006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145292004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dab5c7d4c32e743048dfca98e2d5914f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Splines::UnityEngine.Splines.SplineContainer
+  m_Spline:
+    m_EditModeType: 1
+    m_Knots: []
+    m_MetaData: []
+    m_Closed: 0
+    m_IntData:
+      m_Data: []
+    m_FloatData:
+      m_Data: []
+    m_Float4Data:
+      m_Data: []
+    m_ObjectData:
+      m_Data: []
+  m_Splines:
+  - m_EditModeType: 1
+    m_Knots:
+    - Position:
+        x: 0
+        y: 0
+        z: 0
+      TangentIn:
+        x: -0
+        y: -0
+        z: -6.38933
+      TangentOut:
+        x: 0
+        y: 0
+        z: 4.6811614
+      Rotation:
+        value:
+          x: -0.0021706487
+          y: 0.99987984
+          z: 0.015348233
+          w: -0.00016672896
+    - Position:
+        x: 12.96881
+        y: 0.105999224
+        z: -12.173911
+      TangentIn:
+        x: -0
+        y: -0
+        z: -5.735796
+      TangentOut:
+        x: 0
+        y: 0
+        z: 7.0849066
+      Rotation:
+        value:
+          x: 0.010066516
+          y: 0.7893854
+          z: 0.007318848
+          w: 0.61377174
+    - Position:
+        x: 39.224964
+        y: -0.09384458
+        z: -5.3087416
+      TangentIn:
+        x: -0
+        y: -0
+        z: -8.375485
+      TangentOut:
+        x: 0
+        y: 0
+        z: 9.325697
+      Rotation:
+        value:
+          x: 0.025759658
+          y: 0.39699534
+          z: 0.018807083
+          w: 0.9172663
+    - Position:
+        x: 49.793686
+        y: -1.7573606
+        z: 26.591904
+      TangentIn:
+        x: -0
+        y: -0
+        z: -5.4671125
+      TangentOut:
+        x: 0
+        y: 0
+        z: 4.799021
+      Rotation:
+        value:
+          x: 0.018689955
+          y: -0.34398562
+          z: -0.012386491
+          w: 0.9387072
+    - Position:
+        x: 24.178501
+        y: -1.1938118
+        z: 22.629566
+      TangentIn:
+        x: -0
+        y: -0
+        z: -8.763631
+      TangentOut:
+        x: 0
+        y: 0
+        z: 9.907848
+      Rotation:
+        value:
+          x: -0.014253374
+          y: 0.8476163
+          z: 0.026737867
+          w: -0.5297438
+    m_MetaData:
+    - Mode: 4
+      Tension: 0.5
+    - Mode: 0
+      Tension: 0.5
+    - Mode: 0
+      Tension: 0.5
+    - Mode: 0
+      Tension: 0.5
+    - Mode: 0
+      Tension: 0.5
+    m_Closed: 1
+    m_IntData:
+      m_Data: []
+    m_FloatData:
+      m_Data: []
+    m_Float4Data:
+      m_Data: []
+    m_ObjectData:
+      m_Data: []
+  m_Knots:
+    m_KnotsLink: []
+--- !u!4 &2145292007
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145292004}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.577569, y: 0.084848054, z: -8.833882}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &97917995747334580
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1282,3 +1579,5 @@ SceneRoots:
   - {fileID: 8045325495131385987}
   - {fileID: 8114539694018343539}
   - {fileID: 6882638996175333503}
+  - {fileID: 2145292007}
+  - {fileID: 414354717}
