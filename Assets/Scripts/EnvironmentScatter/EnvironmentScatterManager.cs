@@ -12,18 +12,18 @@ namespace EnvironmentScatter
     {
         [Header("Zones")]
         [Tooltip("All SplineZone components in the scene. Order doesn't matter — exclusion zones always win.")]
-        public List<SplineZone> zones = new List<SplineZone>();
+        public List<SplineZone> zones = new();
 
         [Header("Scatter Bounds")]
         [Tooltip("World-space XZ rect that defines the overall scatterable area.")]
-        public Rect scatterBounds = new Rect(-100f, -100f, 200f, 200f);
+        public Rect scatterBounds = new(-100f, -100f, 200f, 200f);
 
         [Header("Terrain Sources")]
         [Tooltip("Optional Unity Terrain objects. Height is sampled from these if the point falls within them.")]
-        public List<Terrain> unityTerrains = new List<Terrain>();
+        public List<Terrain> unityTerrains = new();
 
         [Tooltip("Optional mesh terrain colliders (your FBX chunks). Height is raycasted from these.")]
-        public List<Collider> meshTerrainColliders = new List<Collider>();
+        public List<Collider> meshTerrainColliders = new();
 
         [Tooltip("LayerMask used when raycasting mesh terrain for height.")]
         public LayerMask meshTerrainLayer = ~0;
@@ -36,7 +36,7 @@ namespace EnvironmentScatter
         public float yOffset = 0f;
 
         [Tooltip("Random Y rotation range in degrees.")]
-        public Vector2 yRotationRange = new Vector2(0f, 360f);
+        public Vector2 yRotationRange = new(0f, 360f);
 
         [Header("Output")]
         [Tooltip("Spawned assets are parented here to keep the hierarchy tidy.")]
@@ -44,11 +44,11 @@ namespace EnvironmentScatter
 
         // ---------------------------------------------------------------
 
-        void Start()
+        private void Start()
         {
             if (scatterRoot == null)
             {
-                var go = new GameObject("ScatterRoot");
+                GameObject go = new("ScatterRoot");
                 scatterRoot = go.transform;
             }
 
@@ -58,27 +58,37 @@ namespace EnvironmentScatter
         public void Scatter()
         {
             // Bake all zone polygons
-            foreach (var zone in zones)
+            foreach (SplineZone zone in zones)
+            {
                 zone.Bake();
+            }
 
             // Separate exclusion zones for fast lookup
-            var exclusionZones = new List<SplineZone>();
-            var spawnZones     = new List<SplineZone>();
+            List<SplineZone> exclusionZones = new();
+            List<SplineZone> spawnZones = new();
 
-            foreach (var zone in zones)
+            foreach (SplineZone zone in zones)
             {
                 if (zone.zoneType == ZoneType.Exclusion)
+                {
                     exclusionZones.Add(zone);
+                }
                 else
+                {
                     spawnZones.Add(zone);
+                }
             }
 
             // Generate candidate points across the full scatter bounds
             float minSpacing = globalMinSpacing;
             // use the smallest zone spacing so no zone is under-sampled
-            foreach (var zone in spawnZones)
+            foreach (SplineZone zone in spawnZones)
+            {
                 if (zone.minSpacing < minSpacing)
+                {
                     minSpacing = zone.minSpacing;
+                }
+            }
 
             List<Vector2> candidates = PoissonDiskSampler.Sample(scatterBounds, minSpacing);
             int spawned = 0;
@@ -87,35 +97,49 @@ namespace EnvironmentScatter
             {
                 // 1. Exclusion check — bail immediately if inside any exclusion zone
                 bool excluded = false;
-                foreach (var ex in exclusionZones)
+                foreach (SplineZone ex in exclusionZones)
                 {
                     if (ex.Contains(xz)) { excluded = true; break; }
                 }
-                if (excluded) continue;
+                if (excluded)
+                {
+                    continue;
+                }
 
                 // 2. Find which spawn zone this point belongs to
                 SplineZone ownerZone = null;
-                foreach (var zone in spawnZones)
+                foreach (SplineZone zone in spawnZones)
                 {
                     if (zone.Contains(xz)) { ownerZone = zone; break; }
                 }
-                if (ownerZone == null) continue;
+                if (ownerZone == null)
+                {
+                    continue;
+                }
 
                 // 3. Sample terrain height at this XZ position
-                float y;
-                if (!TryGetHeight(xz, out y)) continue;
+                if (!TryGetHeight(xz, out float y))
+                {
+                    continue;
+                }
 
                 // 4. Pick a prefab from the zone's weighted list
-                var pick = ownerZone.PickRandom();
-                if (pick == null || pick.Value.prefab == null) continue;
+                WeightedPrefab? pick = ownerZone.PickRandom();
+                if (pick == null || pick.Value.prefab == null)
+                {
+                    continue;
+                }
 
                 // 5. Spawn
-                Vector3 worldPos = new Vector3(xz.x, y + yOffset, xz.y);
-                float   scale    = Random.Range(pick.Value.minScaleMultiplier, pick.Value.maxScaleMultiplier);
-                if (scale <= 0f) scale = 1f;
+                Vector3 worldPos = new(xz.x, y + yOffset, xz.y);
+                float scale = Random.Range(pick.Value.minScaleMultiplier, pick.Value.maxScaleMultiplier);
+                if (scale <= 0f)
+                {
+                    scale = 1f;
+                }
 
-                float   yRot = Random.Range(yRotationRange.x, yRotationRange.y);
-                var     go   = Instantiate(
+                float yRot = Random.Range(yRotationRange.x, yRotationRange.y);
+                GameObject go = Instantiate(
                     pick.Value.prefab,
                     worldPos,
                     Quaternion.Euler(0f, yRot, 0f),
@@ -131,17 +155,21 @@ namespace EnvironmentScatter
         // ---------------------------------------------------------------
         // Height sampling — tries Unity Terrain first, then mesh raycast
 
-        bool TryGetHeight(Vector2 xz, out float height)
+        private bool TryGetHeight(Vector2 xz, out float height)
         {
             height = 0f;
 
             // Try Unity Terrain components
-            foreach (var terrain in unityTerrains)
+            foreach (Terrain terrain in unityTerrains)
             {
-                if (terrain == null) continue;
-                var  data   = terrain.terrainData;
-                var  origin = terrain.transform.position;
-                Rect tRect  = new Rect(origin.x, origin.z, data.size.x, data.size.z);
+                if (terrain == null)
+                {
+                    continue;
+                }
+
+                TerrainData data = terrain.terrainData;
+                Vector3 origin = terrain.transform.position;
+                Rect tRect = new(origin.x, origin.z, data.size.x, data.size.z);
 
                 if (tRect.Contains(xz))
                 {
@@ -153,11 +181,11 @@ namespace EnvironmentScatter
             // Try mesh terrain via raycast
             if (meshTerrainColliders.Count > 0)
             {
-                Ray ray = new Ray(new Vector3(xz.x, 5000f, xz.y), Vector3.down);
+                Ray ray = new(new Vector3(xz.x, 5000f, xz.y), Vector3.down);
                 if (Physics.Raycast(ray, out RaycastHit hit, 10000f, meshTerrainLayer))
                 {
                     // Make sure we only hit one of our registered mesh colliders
-                    foreach (var col in meshTerrainColliders)
+                    foreach (Collider col in meshTerrainColliders)
                     {
                         if (col == hit.collider)
                         {
@@ -172,12 +200,12 @@ namespace EnvironmentScatter
         }
 
         // Draw scatter bounds in editor
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
-            Vector3 center = new Vector3(
+            Vector3 center = new(
                 scatterBounds.center.x, 0f, scatterBounds.center.y);
-            Vector3 size   = new Vector3(
+            Vector3 size = new(
                 scatterBounds.width, 0.1f, scatterBounds.height);
             Gizmos.DrawWireCube(center, size);
         }

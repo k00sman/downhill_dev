@@ -1,14 +1,14 @@
+using Downhill.Input;
+using Downhill.Player;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
-using Downhill.Input;
-using Downhill.Player;
 
 public class PlayerBikePrefabTests
 {
-    const string PrefabPath = "Assets/PFB_Player.prefab";
+    private const string PrefabPath = "Assets/PFB_Player.prefab";
 
-    GameObject _prefab;
+    private GameObject _prefab;
 
     [SetUp]
     public void SetUp()
@@ -35,14 +35,14 @@ public class PlayerBikePrefabTests
     public void Collider_IsOnRootOnly()
     {
         Assert.IsNotNull(_prefab.GetComponent<BoxCollider>(), "BoxCollider missing on root");
-        var colliders = _prefab.GetComponentsInChildren<Collider>(true);
+        Collider[] colliders = _prefab.GetComponentsInChildren<Collider>(true);
         Assert.AreEqual(1, colliders.Length, "Expected exactly one collider, on the root");
     }
 
     [Test]
     public void RootCollider_IsCompactContactProxy()
     {
-        var box = _prefab.GetComponent<BoxCollider>();
+        BoxCollider box = _prefab.GetComponent<BoxCollider>();
         Assert.IsNotNull(box, "BoxCollider missing on root");
         Assert.LessOrEqual(box.size.z, 1.25f,
             "Root contact proxy should be compact enough to avoid bridging steep slope changes.");
@@ -67,10 +67,10 @@ public class PlayerBikePrefabTests
     [TestCase("_recoveryAnchor")]
     public void SerializedReference_IsWired(string fieldName)
     {
-        var controller = _prefab.GetComponent<PlayerBikeController>();
+        PlayerBikeController controller = _prefab.GetComponent<PlayerBikeController>();
         Assert.IsNotNull(controller, "PlayerBikeController missing on root");
-        var so = new SerializedObject(controller);
-        var prop = so.FindProperty(fieldName);
+        SerializedObject so = new(controller);
+        SerializedProperty prop = so.FindProperty(fieldName);
         Assert.IsNotNull(prop, $"Serialized field '{fieldName}' not found");
         Assert.IsNotNull(prop.objectReferenceValue, $"Serialized field '{fieldName}' is not wired");
     }

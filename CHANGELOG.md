@@ -11,6 +11,18 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **C# linter for gameplay code** — 2026-06-24
+  - Self-contained `tools/lint/` project + `scripts/lint.{sh,ps1}`: Phase 1
+    auto-fixes whitespace plus a safe allowlist of style fixes (explicit types,
+    accessibility modifiers, `new()`, parentheses, braces, block bodies) —
+    excluding any code-deleting fixes; Phase 2 reports code-quality via
+    `dotnet build` with `Microsoft.Unity.Analyzers` + built-in analyzers, where
+    `error`-severity findings block.
+  - Root `.editorconfig` encoding the project's conventions (4-space, Allman,
+    block namespaces, `camelCase` serialized fields kept) and severity tiers.
+  - Opt-in `.githooks/pre-commit` hook (`git config core.hooksPath .githooks`).
+  - Linting is scoped to `Assets/{Scripts,Editor,Tests}`; vendor code is excluded.
+
 - **Bike terrain contact stability** — 2026-06-23
   - Added controlled downhill tangent-following with capped upward grounded
     velocity to reduce steep-slope pops.

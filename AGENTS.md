@@ -35,6 +35,36 @@ This repo is worked on by multiple people across **Linux, macOS, and Windows**. 
 - The Unity editor generally **cannot run headless here**, so you usually **cannot run the tests yourself**. **Ask the user to run the Unity Test Runner** (EditMode + PlayMode) and report results — never claim tests passed when you didn't run them.
 - "Done" = typecheck + tests pass. For gameplay features, also confirm against the ticket's acceptance criteria.
 
+## Linting
+
+- Lint gameplay C# (`Assets/Scripts`, `Assets/Editor`, `Assets/Tests`) with the
+  self-contained project in `tools/lint/`. Vendor code under `Assets/` is never
+  linted (the project's compile globs *are* the scope). Requires the project to
+  have been compiled in Unity once (for `Library/ScriptAssemblies` + a generated
+  `.csproj` to harvest the engine path from).
+  - Linux / macOS: `./scripts/lint.sh` — auto-fixes formatting, then reports
+    code-quality issues. `./scripts/lint.sh --check` verifies without writing.
+  - Windows (PowerShell): `pwsh scripts/lint.ps1` (`--check` to verify).
+- **Two phases:**
+  - **Phase 1 (auto-fix):** `dotnet format whitespace` + `dotnet format style`,
+    where `style` is restricted to a **safe allowlist** of diagnostic IDs
+    (explicit types, accessibility modifiers, `new()`, parentheses, braces,
+    block bodies, inlined out-vars, index operators). It runs in a small
+    convergence loop because some fixes are interdependent. It **never** runs the
+    member-deleting fixes (IDE0051/IDE0052) — those once stripped real WIP code.
+    `IDE0032` (auto-property) and the `UNT*` Unity-perf rules are deliberately
+    *excluded* from auto-fix (serialization / behavior risk) and only reported.
+  - **Phase 2 (report + block):** `dotnet build` with analyzers
+    (`Microsoft.Unity.Analyzers` + built-in). Findings are reported, never
+    auto-applied; `error`-severity ones fail the build.
+- Rules and severities live in the root `.editorconfig`. Suppress a single line
+  with `#pragma warning disable <ID>` / `restore`, or change a rule's severity in
+  `.editorconfig`. Public serialized fields stay `camelCase` (Unity convention)
+  by design.
+- Optional pre-commit hook: `git config core.hooksPath .githooks`. It auto-fixes
+  (whitespace) staged in-scope files, re-stages them, and blocks commits with
+  `error`-tier findings (bypass with `git commit --no-verify`).
+
 ## Workflow (specs / plans / tickets)
 
 - Feature work follows **brainstorm → spec → plan → execute**.
@@ -79,6 +109,21 @@ This repo is worked on by multiple people across **Linux, macOS, and Windows**. 
 - Treat the root `BoxCollider` as a compact contact proxy, not the final crash
   volume. If hazard collision feels too forgiving, add a separate crash/hazard
   trigger later instead of enlarging the contact proxy.
+- **Linting is "done" only after reading the linter's output, not on a green
+  build.** `./scripts/lint.sh` exiting 0 with warnings is not clean — enumerate
+  warnings (`... | grep -oE 'warning [A-Z]+[0-9]+' | sort | uniq -c`), decide
+  each consciously, and surface the whole set at once instead of fixing them one
+  round at a time.
+- **NEVER run `dotnet format style` over the full rule set in apply mode.** Its
+  IDE0051/IDE0052 ("unused member") code-fixes *delete* members — it silently
+  stripped real WIP lifecycle/wiring methods out of `PlayerInputReader` and
+  `PlayerBikeController`. Only apply the scoped allowlist baked into
+  `scripts/lint.*`, and review `git diff` (and `git diff -w`) after any format
+  run before treating it as done. UNT* perf rules change behavior — report, don't
+  auto-fix.
+- Validate the exact mode you ship: test `apply` (not just `--verify`), confirm
+  idempotency (`./scripts/lint.sh` then `--check` from a clean tree), and read
+  the diff for any file-mutating step.
 
 ## Game design summary
 

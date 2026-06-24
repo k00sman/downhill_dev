@@ -1,0 +1,68 @@
+# Downhill — formatting + analyzer policy. Encodes the conventions used in
+# Assets/Scripts and the linter severity tiers (see linter design spec).
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# --- Layout ---
+csharp_new_line_before_open_brace = all
+csharp_style_namespace_declarations = block_scoped:warning
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# === C# style preferences (intentional; auto-fixed unless noted) ============
+# Prefer explicit types over var (matches gameplay code).
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = false:warning
+csharp_style_var_elsewhere = false:warning
+# Require accessibility modifiers everywhere.
+dotnet_style_require_accessibility_modifiers = always:warning
+# Prefer target-typed new().
+csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
+# Parentheses for clarity.
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:warning
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:warning
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:warning
+# Block bodies for methods.
+csharp_style_expression_bodied_methods = false:warning
+# Always use braces (was brace-less-if; switched on request).
+csharp_prefer_braces = true:warning
+# Index/range operators and inlined out-variables.
+csharp_style_prefer_index_operator = true:warning
+csharp_style_inlined_variable_declaration = true:warning
+# Auto-property: REPORTED, not auto-fixed (Unity serialization sensitivity).
+dotnet_diagnostic.IDE0032.severity = warning
+
+# Unity convention: public serialized fields are camelCase. Don't force
+# PascalCase on fields, and silence the "visible instance field" rule.
+dotnet_diagnostic.CA1051.severity = none
+# Unity assigns serialized fields via the Inspector; never-assigned warnings off.
+dotnet_diagnostic.CS0649.severity = none
+dotnet_diagnostic.CS0169.severity = none
+
+# === Severity tiers (Phase 2 gate) =========================================
+# --- ERROR (blocks the commit hook) ---
+dotnet_diagnostic.UNT0001.severity = error   # empty Unity message method
+dotnet_diagnostic.UNT0007.severity = error   # null-coalescing on UnityEngine.Object
+dotnet_diagnostic.UNT0008.severity = error   # null-propagation on UnityEngine.Object
+dotnet_diagnostic.CS0219.severity = error    # variable assigned but never used
+dotnet_diagnostic.IDE0059.severity = error   # unnecessary value assignment
+dotnet_diagnostic.CS0162.severity = error    # unreachable code
+
+# --- WARNING (reported, non-blocking) ---
+# Scaffolded-ahead private members are expected in this prototype.
+dotnet_diagnostic.IDE0051.severity = warning # unused private member
+# Unity perf suggestions — surfaced but NOT auto-fixed (they change behavior:
+# TryGetComponent null-handling, RequireComponent runtime deps). Apply by hand.
+dotnet_diagnostic.UNT0022.severity = warning # use Transform.SetPositionAndRotation
+dotnet_diagnostic.UNT0026.severity = warning # GetComponent allocates; consider TryGetComponent
+dotnet_diagnostic.UNT0039.severity = warning # consider RequireComponent attribute
+
+# --- DISABLED (misfire in Unity / noise) ---
+dotnet_diagnostic.IDE0058.severity = none    # expression value never used (common in Unity APIs)

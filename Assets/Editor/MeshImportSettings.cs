@@ -2,7 +2,7 @@ using UnityEditor;
 
 public class MeshImportSettings : AssetPostprocessor
 {
-    void OnPreprocessModel()
+    private void OnPreprocessModel()
     {
         ModelImporter importer = (ModelImporter)assetImporter;
 

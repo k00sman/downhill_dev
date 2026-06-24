@@ -18,40 +18,51 @@ namespace EnvironmentScatter
         public static List<Vector2> Sample(Rect bounds, float minDist)
         {
             float cellSize = minDist / Mathf.Sqrt(2f);
-            int cols = Mathf.CeilToInt(bounds.width  / cellSize);
+            int cols = Mathf.CeilToInt(bounds.width / cellSize);
             int rows = Mathf.CeilToInt(bounds.height / cellSize);
 
-            int[,] grid       = new int[cols, rows];
-            var    points     = new List<Vector2>();
-            var    active     = new List<Vector2>();
+            int[,] grid = new int[cols, rows];
+            List<Vector2> points = new();
+            List<Vector2> active = new();
 
             // init grid to -1 (empty)
             for (int x = 0; x < cols; x++)
+            {
                 for (int y = 0; y < rows; y++)
+                {
                     grid[x, y] = -1;
+                }
+            }
 
             // seed with a random point
-            Vector2 seed = new Vector2(
+            Vector2 seed = new(
                 Random.Range(bounds.xMin, bounds.xMax),
                 Random.Range(bounds.yMin, bounds.yMax));
             AddPoint(seed, bounds, cellSize, cols, rows, grid, points, active);
 
             while (active.Count > 0)
             {
-                int idx    = Random.Range(0, active.Count);
+                int idx = Random.Range(0, active.Count);
                 Vector2 origin = active[idx];
                 bool found = false;
 
                 for (int k = 0; k < K; k++)
                 {
-                    float   angle  = Random.Range(0f, Mathf.PI * 2f);
-                    float   radius = Random.Range(minDist, minDist * 2f);
+                    float angle = Random.Range(0f, Mathf.PI * 2f);
+                    float radius = Random.Range(minDist, minDist * 2f);
                     Vector2 candidate = origin + new Vector2(
                         Mathf.Cos(angle) * radius,
                         Mathf.Sin(angle) * radius);
 
-                    if (!bounds.Contains(candidate)) continue;
-                    if (!IsValid(candidate, bounds, cellSize, cols, rows, grid, points, minDist)) continue;
+                    if (!bounds.Contains(candidate))
+                    {
+                        continue;
+                    }
+
+                    if (!IsValid(candidate, bounds, cellSize, cols, rows, grid, points, minDist))
+                    {
+                        continue;
+                    }
 
                     AddPoint(candidate, bounds, cellSize, cols, rows, grid, points, active);
                     found = true;
@@ -59,13 +70,15 @@ namespace EnvironmentScatter
                 }
 
                 if (!found)
+                {
                     active.RemoveAt(idx);
+                }
             }
 
             return points;
         }
 
-        static bool IsValid(Vector2 p, Rect bounds, float cellSize,
+        private static bool IsValid(Vector2 p, Rect bounds, float cellSize,
                             int cols, int rows, int[,] grid,
                             List<Vector2> points, float minDist)
         {
@@ -78,15 +91,21 @@ namespace EnvironmentScatter
             int y1 = Mathf.Min(rows - 1, gy + 2);
 
             for (int x = x0; x <= x1; x++)
+            {
                 for (int y = y0; y <= y1; y++)
+                {
                     if (grid[x, y] >= 0 &&
                         Vector2.Distance(points[grid[x, y]], p) < minDist)
+                    {
                         return false;
+                    }
+                }
+            }
 
             return true;
         }
 
-        static void AddPoint(Vector2 p, Rect bounds, float cellSize,
+        private static void AddPoint(Vector2 p, Rect bounds, float cellSize,
                              int cols, int rows, int[,] grid,
                              List<Vector2> points, List<Vector2> active)
         {

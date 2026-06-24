@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Downhill pre-commit linter. Enable with: git config core.hooksPath .githooks
+# Auto-fixes formatting (re-staged), then blocks on code-quality errors.
+# Bypass intentionally with: git commit --no-verify
+set -uo pipefail
+
+REPO=$(git rev-parse --show-toplevel)
+
+# Only act if in-scope files are staged.
+if git diff --cached --name-only | grep -qE '^Assets/(Scripts|Editor|Tests)/.*\.cs$'; then
+  "$REPO/scripts/lint.sh"
+  rc=$?
+  # Re-stage any in-scope files the formatter rewrote.
+  git add -- "$REPO/Assets/Scripts" "$REPO/Assets/Editor" "$REPO/Assets/Tests" 2>/dev/null || true
+  if [ "$rc" -ne 0 ]; then
+    echo "pre-commit: lint failed — fix the errors above or use 'git commit --no-verify' to bypass." >&2
+    exit "$rc"
+  fi
+fi
+exit 0

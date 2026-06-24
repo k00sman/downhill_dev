@@ -18,8 +18,8 @@ namespace EnvironmentScatter
     {
         public GameObject prefab;
         [Range(0f, 100f)] public float weight;
-        [Range(0f, 1f)]   public float minScaleMultiplier;
-        [Range(0f, 1f)]   public float maxScaleMultiplier;
+        [Range(0f, 1f)] public float minScaleMultiplier;
+        [Range(0f, 1f)] public float maxScaleMultiplier;
     }
 
     /// <summary>
@@ -36,21 +36,20 @@ namespace EnvironmentScatter
         public float minSpacing = 1.5f;
 
         [Tooltip("Assets to spawn. Weights are relative — no need to sum to 100.")]
-        public List<WeightedPrefab> assets = new List<WeightedPrefab>();
+        public List<WeightedPrefab> assets = new();
 
         // cached spline points in world XZ (built once at scatter time)
         private Vector2[] _polygon;
-        private Rect       _bounds;
-        private bool       _ready;
+        private Rect _bounds;
 
-        public Rect   Bounds  => _bounds;
-        public bool   IsReady => _ready;
+        public Rect Bounds => _bounds;
+        public bool IsReady { get; private set; }
 
         /// <summary>Call this once before any point-in-zone tests.</summary>
         public void Bake(int sampleCount = 64)
         {
-            var container = GetComponent<SplineContainer>();
-            var spline    = container.Spline;
+            SplineContainer container = GetComponent<SplineContainer>();
+            Spline spline = container.Spline;
 
             _polygon = new Vector2[sampleCount];
             float xMin = float.MaxValue, xMax = float.MinValue;
@@ -59,29 +58,51 @@ namespace EnvironmentScatter
             for (int i = 0; i < sampleCount; i++)
             {
                 float t = i / (float)sampleCount;
-                Vector3 localPt  = spline.EvaluatePosition(t);
-                Vector3 worldPt  = transform.TransformPoint(localPt);
+                Vector3 localPt = spline.EvaluatePosition(t);
+                Vector3 worldPt = transform.TransformPoint(localPt);
 
                 _polygon[i] = new Vector2(worldPt.x, worldPt.z);
 
-                if (worldPt.x < xMin) xMin = worldPt.x;
-                if (worldPt.x > xMax) xMax = worldPt.x;
-                if (worldPt.z < yMin) yMin = worldPt.z;
-                if (worldPt.z > yMax) yMax = worldPt.z;
+                if (worldPt.x < xMin)
+                {
+                    xMin = worldPt.x;
+                }
+
+                if (worldPt.x > xMax)
+                {
+                    xMax = worldPt.x;
+                }
+
+                if (worldPt.z < yMin)
+                {
+                    yMin = worldPt.z;
+                }
+
+                if (worldPt.z > yMax)
+                {
+                    yMax = worldPt.z;
+                }
             }
 
             _bounds = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
-            _ready  = true;
+            IsReady = true;
         }
 
         /// <summary>Even-odd ray crossing test — works for any concave polygon.</summary>
         public bool Contains(Vector2 point)
         {
-            if (!_ready) return false;
-            if (!_bounds.Contains(point)) return false;
+            if (!IsReady)
+            {
+                return false;
+            }
+
+            if (!_bounds.Contains(point))
+            {
+                return false;
+            }
 
             bool inside = false;
-            int  j      = _polygon.Length - 1;
+            int j = _polygon.Length - 1;
 
             for (int i = 0; i < _polygon.Length; i++)
             {
@@ -89,8 +110,12 @@ namespace EnvironmentScatter
                 float xj = _polygon[j].x, yj = _polygon[j].y;
 
                 bool intersect = ((yi > point.y) != (yj > point.y)) &&
-                                 (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
+                                 (point.x < ((xj - xi) * (point.y - yi) / (yj - yi)) + xi);
+                if (intersect)
+                {
+                    inside = !inside;
+                }
+
                 j = i;
             }
 
@@ -100,41 +125,56 @@ namespace EnvironmentScatter
         /// <summary>Picks a random prefab from the weighted list.</summary>
         public WeightedPrefab? PickRandom()
         {
-            if (assets == null || assets.Count == 0) return null;
-
-            float total = 0f;
-            foreach (var a in assets) total += a.weight;
-            if (total <= 0f) return null;
-
-            float roll = Random.Range(0f, total);
-            float acc  = 0f;
-
-            foreach (var a in assets)
+            if (assets == null || assets.Count == 0)
             {
-                acc += a.weight;
-                if (roll <= acc) return a;
+                return null;
             }
 
-            return assets[assets.Count - 1];
+            float total = 0f;
+            foreach (WeightedPrefab a in assets)
+            {
+                total += a.weight;
+            }
+
+            if (total <= 0f)
+            {
+                return null;
+            }
+
+            float roll = Random.Range(0f, total);
+            float acc = 0f;
+
+            foreach (WeightedPrefab a in assets)
+            {
+                acc += a.weight;
+                if (roll <= acc)
+                {
+                    return a;
+                }
+            }
+
+            return assets[^1];
         }
 
         // Draw the zone outline in the editor
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
-            var container = GetComponent<SplineContainer>();
-            if (container == null) return;
+            if (!TryGetComponent<SplineContainer>(out SplineContainer container))
+            {
+                return;
+            }
 
             Gizmos.color = zoneType == ZoneType.Exclusion
                 ? new Color(1f, 0.2f, 0.2f, 0.6f)
                 : new Color(0.2f, 1f, 0.4f, 0.4f);
 
-            var spline = container.Spline;
-            int steps  = 48;
+            Spline spline = container.Spline;
+            int steps = 48;
             Vector3 prev = transform.TransformPoint(spline.EvaluatePosition(0f));
 
             for (int i = 1; i <= steps; i++)
             {
-                float   t    = i / (float)steps;
+                float t = i / (float)steps;
                 Vector3 curr = transform.TransformPoint(spline.EvaluatePosition(t));
                 Gizmos.DrawLine(prev, curr);
                 prev = curr;

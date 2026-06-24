@@ -1,26 +1,26 @@
 using System.Collections;
+using Downhill.Player;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Downhill.Player;
 
 public class PlayerBikeControllerTests
 {
-    const string PrefabPath = "Assets/PFB_Player.prefab";
+    private const string PrefabPath = "Assets/PFB_Player.prefab";
 
     [UnityTest]
     public IEnumerator Prefab_Instantiates_WithoutErrors_AndWiresReferences()
     {
 #if UNITY_EDITOR
-        var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         Assert.IsNotNull(prefab, $"Player prefab not found at {PrefabPath}");
 
-        var instance = Object.Instantiate(prefab);
+        GameObject instance = Object.Instantiate(prefab);
         yield return null; // Awake + OnEnable + one frame
 
         LogAssert.NoUnexpectedReceived(); // Awake's validation logged no errors
 
-        var controller = instance.GetComponent<PlayerBikeController>();
+        PlayerBikeController controller = instance.GetComponent<PlayerBikeController>();
         Assert.IsNotNull(controller, "PlayerBikeController missing on instance");
         Assert.AreEqual(BikeState.Riding, controller.State, "State should start as Riding");
         Assert.IsNotNull(controller.Body, "Body not wired");
@@ -41,14 +41,14 @@ public class PlayerBikeControllerTests
     public IEnumerator Prefab_FreezesYawUntilSteeringExists()
     {
 #if UNITY_EDITOR
-        var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         Assert.IsNotNull(prefab, $"Player prefab not found at {PrefabPath}");
 
-        var instance = Object.Instantiate(prefab);
+        GameObject instance = Object.Instantiate(prefab);
         yield return null; // Awake applies runtime Rigidbody setup.
 
-        var controller = instance.GetComponent<PlayerBikeController>();
-        var constraints = controller.Body.constraints;
+        PlayerBikeController controller = instance.GetComponent<PlayerBikeController>();
+        RigidbodyConstraints constraints = controller.Body.constraints;
         Assert.IsTrue((constraints & RigidbodyConstraints.FreezeRotationX) != 0,
             "Pitch must stay locked until crash/air control is implemented.");
         Assert.IsTrue((constraints & RigidbodyConstraints.FreezeRotationY) != 0,
@@ -68,22 +68,22 @@ public class PlayerBikeControllerTests
     public IEnumerator GroundedBikeBody_PitchesToTerrainWhileRootStaysFrozen()
     {
 #if UNITY_EDITOR
-        var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         Assert.IsNotNull(prefab, $"Player prefab not found at {PrefabPath}");
 
-        var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        ground.transform.rotation = Quaternion.Euler(20f, 0f, 0f);
-        ground.transform.position = Vector3.zero;
+        GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ground.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(20f, 0f, 0f));
         ground.transform.localScale = new Vector3(50f, 1f, 50f);
 
-        var instance = Object.Instantiate(prefab);
-        instance.transform.position = Vector3.up * 1f;
-        instance.transform.rotation = Quaternion.identity;
+        GameObject instance = Object.Instantiate(prefab);
+        instance.transform.SetPositionAndRotation(Vector3.up * 1f, Quaternion.identity);
 
         for (int i = 0; i < 30; i++)
+        {
             yield return new WaitForFixedUpdate();
+        }
 
-        var controller = instance.GetComponent<PlayerBikeController>();
+        PlayerBikeController controller = instance.GetComponent<PlayerBikeController>();
         Assert.IsNotNull(controller);
         Assert.IsTrue((controller.Body.constraints & RigidbodyConstraints.FreezeRotation) == RigidbodyConstraints.FreezeRotation,
             "Root Rigidbody should remain fully rotation-frozen.");
