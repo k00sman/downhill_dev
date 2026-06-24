@@ -2,6 +2,13 @@
 
 Downhill is a stylized downhill mountain-biking **horror** prototype: the player descends a dark, dangerous trail under a pursuing monster. Survival comes from momentum — ride too slow and the monster catches up, ride too aggressively and a crash kills you. This repo is a **gameplay prototype** whose goal is to validate that the bike handling feels tense and readable, that the chase creates real pressure, and that modular trail segments stitch into replayable runs. Favor simple, tunable, testable solutions over production architecture.
 
+## Maintainers & platforms
+
+This repo is worked on by multiple people across **Linux, macOS, and Windows**. Keep tooling cross-platform:
+- Shell scripts live in `scripts/` — always provide a `.sh` (bash) and a `.ps1` (PowerShell) variant side by side.
+- The Unity editor itself handles Linux/macOS/Windows transparently.
+- `dotnet` (10.x) must be available on the developer's machine to run the codemap tool; it is not bundled.
+
 ## Tech stack & engine
 
 - **Unity 6000.3.17f1** (Unity 6.3), **URP 17.3.0**. Platforms: **Linux**, **Windows**, *mMacOS**.
@@ -13,6 +20,7 @@ Downhill is a stylized downhill mountain-biking **horror** prototype: the player
 - New gameplay code lives in focused **assembly definitions** (e.g. `Downhill.Input` asmdef at `Assets/Scripts/Input/`). Keep risky mechanics isolated in their own files so they can be replaced.
 - **`.meta` files MUST be committed** alongside their asset/script. Never leave a new file without its meta.
 - **Third-party content under `Assets/` is off-limits** — do not modify it: PathCreator, Retro Shaders Pro, Adrift Team, and other vendor folders.
+- **Before grepping or exploring `Assets/Scripts/` to understand the codebase, READ `docs/codemap.md` first.** It is a Mermaid class diagram of all gameplay types, their fields, public methods, and cross-type dependencies — faster than grepping. Regenerate it if it looks stale (see Workflow section for commands).
 
 ## Input
 
@@ -36,6 +44,7 @@ Downhill is a stylized downhill mountain-biking **horror** prototype: the player
 - Specs go in `docs/superpowers/specs/`; plans go in `docs/superpowers/plans/`.
 - The roadmap lives in **`docs/TICKETS.md`** — the source of work. Phase order:
   1. Input & player scaffolding → 2. Bicycle locomotion → 3. Turning, braking & camera → 4. Jumping & crash basics → 5. Health & fail states → 6. Monster chase stub → 7. Readability & instrumentation.
+- Sprint files live in `docs/sprints/` — one file per sprint, each containing its tickets in full. **When starting a sprint, read the sprint file.** When a sprint's exit criteria are met, mark it complete at the top of the sprint file.
 - **Definition of done** (per ticket): feature works in the existing level; touched files match planned scope; acceptance criteria met; debug output is enough to tune the feature; no unrelated systems introduced silently.
 - After completing every ticket, review `AGENTS.md` and append useful lessons
   from the session: development patterns, Unity/Test Runner pitfalls,
@@ -43,6 +52,10 @@ Downhill is a stylized downhill mountain-biking **horror** prototype: the player
 - After completing every ticket, review `docs/TICKETS.md` and update later
   tickets with any discoveries, deferred scope, or acceptance criteria that
   future agents will need to know.
+- **After completing a ticket (or any meaningful set of code changes), regenerate the code map.** The tool lives in `tools/codemap/` and uses Roslyn — no Unity Editor required. Run from the repo root:
+  - Linux / macOS: `bash scripts/generate-codemap.sh`
+  - Windows (PowerShell): `pwsh scripts/generate-codemap.ps1`
+  - Any platform (fallback): `dotnet run --project tools/codemap/codemap.csproj -- <repo-root>`
 
 ## Changelog — read and update it
 
