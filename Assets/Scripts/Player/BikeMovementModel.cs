@@ -35,12 +35,18 @@ namespace Downhill.Player
         {
             Vector3 forwardFlat = Vector3.ProjectOnPlane(facing, Vector3.up);
             if (forwardFlat.sqrMagnitude < 1e-6f)
+            {
                 return velocity; // heading vertical — avoid NaN
+            }
+
             forwardFlat.Normalize();
 
             Vector3 forwardOnSlope = Vector3.ProjectOnPlane(forwardFlat, groundNormal);
             if (forwardOnSlope.sqrMagnitude < 1e-6f)
+            {
                 return velocity; // heading parallel to the normal — avoid NaN
+            }
+
             forwardOnSlope.Normalize();
 
             Vector3 gravityVec = Vector3.down * gravity;
@@ -57,11 +63,15 @@ namespace Downhill.Player
 
             float horizontalComponent = Vector3.Dot(forwardOnSlope, forwardFlat);
             if (horizontalComponent < 0.1f)
+            {
                 return forwardFlat * speed;
+            }
 
             Vector3 result = forwardOnSlope * (speed / horizontalComponent);
             if (result.y > maxGroundedUpSpeed)
+            {
                 result.y = maxGroundedUpSpeed;
+            }
 
             return result;
         }

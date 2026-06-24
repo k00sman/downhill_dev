@@ -5,9 +5,9 @@ using UnityEngine.InputSystem;
 
 public class DownhillControlsAssetTests
 {
-    const string AssetPath = "Assets/Scripts/Input/DownhillControls.inputactions";
+    private const string AssetPath = "Assets/Scripts/Input/DownhillControls.inputactions";
 
-    InputActionAsset _asset;
+    private InputActionAsset _asset;
 
     [SetUp]
     public void SetUp()
@@ -31,7 +31,7 @@ public class DownhillControlsAssetTests
     [TestCase("Freelook")]
     public void Action_Exists(string actionName)
     {
-        var map = _asset.FindActionMap("Bike");
+        InputActionMap map = _asset.FindActionMap("Bike");
         Assert.IsNotNull(map.FindAction(actionName), $"Action '{actionName}' missing");
     }
 
@@ -46,8 +46,8 @@ public class DownhillControlsAssetTests
     [Test]
     public void EveryAction_HasKeyboardAndGamepadBindings()
     {
-        var map = _asset.FindActionMap("Bike");
-        foreach (var action in map.actions)
+        InputActionMap map = _asset.FindActionMap("Bike");
+        foreach (InputAction action in map.actions)
         {
             bool kbm = action.bindings.Any(b => b.groups != null && b.groups.Contains("Keyboard&Mouse"));
             bool pad = action.bindings.Any(b => b.groups != null && b.groups.Contains("Gamepad"));

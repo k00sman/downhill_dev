@@ -1,18 +1,18 @@
 using System.Collections;
+using Downhill.Input;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using UnityEngine.InputSystem;
-using Downhill.Input;
+using UnityEngine.TestTools;
 
 public class PlayerInputReaderTests : InputTestFixture
 {
     [UnityTest]
     public IEnumerator Turn_ReflectsGamepadLeftStickX()
     {
-        var gamepad = InputSystem.AddDevice<Gamepad>();
-        var go = new GameObject("reader");
-        var reader = go.AddComponent<PlayerInputReader>();
+        Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+        GameObject go = new("reader");
+        PlayerInputReader reader = go.AddComponent<PlayerInputReader>();
         yield return null; // Awake + OnEnable run
 
         Set(gamepad.leftStick, new Vector2(1f, 0f));
@@ -25,9 +25,9 @@ public class PlayerInputReaderTests : InputTestFixture
     [UnityTest]
     public IEnumerator PedalLeftPressed_FiresOnLeftShoulder()
     {
-        var gamepad = InputSystem.AddDevice<Gamepad>();
-        var go = new GameObject("reader");
-        var reader = go.AddComponent<PlayerInputReader>();
+        Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+        GameObject go = new("reader");
+        PlayerInputReader reader = go.AddComponent<PlayerInputReader>();
         bool fired = false;
         reader.PedalLeftPressed += () => fired = true;
         yield return null;

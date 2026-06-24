@@ -8,7 +8,7 @@ namespace Downhill.Input
     /// through this component and never touches raw keys or InputActions directly.
     public class PlayerInputReader : MonoBehaviour
     {
-        DownhillControls _controls;
+        private DownhillControls _controls;
 
         public float Turn { get; private set; }
         public float FrontBrake { get; private set; }
@@ -20,31 +20,37 @@ namespace Downhill.Input
         public event Action PedalRightPressed;
         public event Action Jumped;
 
-        void Awake() => _controls = new DownhillControls();
-
-        void OnEnable()
+        private void Awake()
         {
-            var bike = _controls.Bike;
+            _controls = new DownhillControls();
+        }
+
+        private void OnEnable()
+        {
+            DownhillControls.BikeActions bike = _controls.Bike;
             bike.Enable();
             bike.PedalLeft.performed += OnPedalLeft;
             bike.PedalRight.performed += OnPedalRight;
             bike.Jump.performed += OnJump;
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
-            var bike = _controls.Bike;
+            DownhillControls.BikeActions bike = _controls.Bike;
             bike.PedalLeft.performed -= OnPedalLeft;
             bike.PedalRight.performed -= OnPedalRight;
             bike.Jump.performed -= OnJump;
             bike.Disable();
         }
 
-        void OnDestroy() => _controls?.Dispose();
-
-        void Update()
+        private void OnDestroy()
         {
-            var bike = _controls.Bike;
+            _controls?.Dispose();
+        }
+
+        private void Update()
+        {
+            DownhillControls.BikeActions bike = _controls.Bike;
             Turn = bike.Turn.ReadValue<float>();
             FrontBrake = bike.FrontBrake.ReadValue<float>();
             RearBrake = bike.RearBrake.ReadValue<float>();
@@ -52,8 +58,19 @@ namespace Downhill.Input
             JumpedThisFrame = bike.Jump.WasPerformedThisFrame();
         }
 
-        void OnPedalLeft(InputAction.CallbackContext _) => PedalLeftPressed?.Invoke();
-        void OnPedalRight(InputAction.CallbackContext _) => PedalRightPressed?.Invoke();
-        void OnJump(InputAction.CallbackContext _) => Jumped?.Invoke();
+        private void OnPedalLeft(InputAction.CallbackContext _)
+        {
+            PedalLeftPressed?.Invoke();
+        }
+
+        private void OnPedalRight(InputAction.CallbackContext _)
+        {
+            PedalRightPressed?.Invoke();
+        }
+
+        private void OnJump(InputAction.CallbackContext _)
+        {
+            Jumped?.Invoke();
+        }
     }
 }

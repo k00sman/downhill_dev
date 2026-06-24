@@ -1,28 +1,31 @@
+using Downhill.Player;
 using NUnit.Framework;
 using UnityEngine;
-using Downhill.Player;
 
 public class BikeMovementModelTests
 {
     // Known, simple tuning so expected directions are obvious.
-    static BikeMovementModel MakeModel() => new BikeMovementModel
+    private static BikeMovementModel MakeModel()
     {
-        maxSpeed = 20f,
-        slopeDriveGain = 0.5f,
-        pedalAccel = 8f,
-        drag = 0.02f,
-        gravity = 9.81f,
-    };
+        return new()
+        {
+            maxSpeed = 20f,
+            slopeDriveGain = 0.5f,
+            pedalAccel = 8f,
+            drag = 0.02f,
+            gravity = 9.81f,
+        };
+    }
 
     // A ground normal for a plane that descends along +Z (downhill ahead).
     // Such a plane's normal tilts forward (toward +Z) by `angleDeg`.
-    static Vector3 DownhillNormal(float angleDeg)
+    private static Vector3 DownhillNormal(float angleDeg)
     {
         float r = angleDeg * Mathf.Deg2Rad;
         return new Vector3(0f, Mathf.Cos(r), Mathf.Sin(r)).normalized;
     }
 
-    static Vector3 UphillNormal(float angleDeg)
+    private static Vector3 UphillNormal(float angleDeg)
     {
         float r = angleDeg * Mathf.Deg2Rad;
         return new Vector3(0f, Mathf.Cos(r), -Mathf.Sin(r)).normalized;
@@ -31,9 +34,9 @@ public class BikeMovementModelTests
     [Test]
     public void Flat_NoPedal_WithSpeed_Slows()
     {
-        var m = MakeModel();
-        var v = Vector3.forward * 5f;
-        var result = m.Step(v, Vector3.forward, Vector3.up, 0f, 0.02f);
+        BikeMovementModel m = MakeModel();
+        Vector3 v = Vector3.forward * 5f;
+        Vector3 result = m.Step(v, Vector3.forward, Vector3.up, 0f, 0.02f);
         Assert.Less(Vector3.Dot(result, Vector3.forward), 5f);
         Assert.Greater(Vector3.Dot(result, Vector3.forward), 0f);
     }
@@ -41,46 +44,49 @@ public class BikeMovementModelTests
     [Test]
     public void Downhill_NoPedal_FromRest_SpeedsUp()
     {
-        var m = MakeModel();
-        var n = DownhillNormal(20f);
-        var result = m.Step(Vector3.zero, Vector3.forward, n, 0f, 0.02f);
+        BikeMovementModel m = MakeModel();
+        Vector3 n = DownhillNormal(20f);
+        Vector3 result = m.Step(Vector3.zero, Vector3.forward, n, 0f, 0.02f);
         Assert.Greater(Vector3.Dot(result, Vector3.forward), 0f);
     }
 
     [Test]
     public void Flat_Pedalling_FromRest_SpeedsUp()
     {
-        var m = MakeModel();
-        var result = m.Step(Vector3.zero, Vector3.forward, Vector3.up, 1f, 0.02f);
+        BikeMovementModel m = MakeModel();
+        Vector3 result = m.Step(Vector3.zero, Vector3.forward, Vector3.up, 1f, 0.02f);
         Assert.Greater(Vector3.Dot(result, Vector3.forward), 0f);
     }
 
     [Test]
     public void SpeedCap_Respected_OverManySteps()
     {
-        var m = MakeModel();
-        var n = DownhillNormal(45f);
-        var v = Vector3.zero;
+        BikeMovementModel m = MakeModel();
+        Vector3 n = DownhillNormal(45f);
+        Vector3 v = Vector3.zero;
         for (int i = 0; i < 2000; i++)
+        {
             v = m.Step(v, Vector3.forward, n, 1f, 0.02f);
+        }
+
         Assert.LessOrEqual(Vector3.Dot(v, Vector3.forward), m.maxSpeed + 0.01f);
     }
 
     [Test]
     public void Uphill_LowSpeed_DoesNotReverse()
     {
-        var m = MakeModel();
+        BikeMovementModel m = MakeModel();
         // Uphill ahead: surface rises toward +Z, so its normal tilts back (-Z)
         // and facing +Z climbs.
-        var n = UphillNormal(20f);
-        var result = m.Step(Vector3.zero, Vector3.forward, n, 0f, 0.02f);
+        Vector3 n = UphillNormal(20f);
+        Vector3 result = m.Step(Vector3.zero, Vector3.forward, n, 0f, 0.02f);
         Assert.GreaterOrEqual(Vector3.Dot(result, Vector3.forward), 0f);
     }
 
     [Test]
     public void GentleUphill_WithModerateSpeed_CoastsAcrossShortRise()
     {
-        var m = MakeModel();
+        BikeMovementModel m = MakeModel();
         // 0.4m up across 10m is a shallow trail undulation, not a wall.
         float angleDeg = Mathf.Atan2(0.4f, 10f) * Mathf.Rad2Deg;
         Vector3 groundNormal = UphillNormal(angleDeg);
@@ -103,7 +109,7 @@ public class BikeMovementModelTests
     [Test]
     public void SmoothBumpNormals_WithoutForces_DoNotPumpOrKillSpeed()
     {
-        var m = MakeModel();
+        BikeMovementModel m = MakeModel();
         m.drag = 0f;
         m.gravity = 0f;
 
@@ -124,7 +130,7 @@ public class BikeMovementModelTests
     [Test]
     public void SteepDownhill_AllowsDownwardTangentFollow()
     {
-        var m = MakeModel();
+        BikeMovementModel m = MakeModel();
         m.drag = 0f;
         m.gravity = 0f;
 
@@ -140,7 +146,7 @@ public class BikeMovementModelTests
     [Test]
     public void SteepUphill_CapsUpwardLaunchVelocity()
     {
-        var m = MakeModel();
+        BikeMovementModel m = MakeModel();
         m.drag = 0f;
         m.gravity = 0f;
         m.maxGroundedUpSpeed = 0.75f;
@@ -156,10 +162,10 @@ public class BikeMovementModelTests
     [Test]
     public void DegenerateHeading_ReturnsInputVelocity()
     {
-        var m = MakeModel();
-        var v = Vector3.forward * 3f;
+        BikeMovementModel m = MakeModel();
+        Vector3 v = Vector3.forward * 3f;
         // facing parallel to the normal -> projected heading is ~zero.
-        var result = m.Step(v, Vector3.up, Vector3.up, 1f, 0.02f);
+        Vector3 result = m.Step(v, Vector3.up, Vector3.up, 1f, 0.02f);
         Assert.AreEqual(v, result);
     }
 }
