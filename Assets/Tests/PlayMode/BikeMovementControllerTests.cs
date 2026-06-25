@@ -2,27 +2,36 @@ using System.Collections;
 using Downhill.Player;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.TestTools;
 
-public class BikeMovementControllerTests
+public class BikeMovementControllerTests : InputTestFixture
 {
     private const string PrefabPath = "Assets/PFB_Player.prefab";
 
     private GameObject _ground;
     private GameObject _player;
 
+    [SetUp]
+    public override void Setup()
+    {
+        base.Setup();
+    }
+
     [TearDown]
-    public void TearDown()
+    public override void TearDown()
     {
         if (_player != null)
         {
-            Object.Destroy(_player);
+            Object.DestroyImmediate(_player);
         }
 
         if (_ground != null)
         {
-            Object.Destroy(_ground);
+            Object.DestroyImmediate(_ground);
         }
+
+        base.TearDown();
     }
 
     // Big flat or tilted ground slab the player can rest on.
@@ -147,6 +156,68 @@ public class BikeMovementControllerTests
         LogAssert.NoUnexpectedReceived();
 #else
         Assert.Ignore("PlayMode movement tests require the editor (AssetDatabase).");
+        yield break;
+#endif
+    }
+
+    [UnityTest]
+    public IEnumerator TurnInput_WhileMoving_RotatesHeadingAndVelocity()
+    {
+#if UNITY_EDITOR
+        _ground = MakeGround(Quaternion.identity);
+        yield return SpawnPlayerAbove(_ground, 1.0f);
+        PlayerBikeController c = _player.GetComponent<PlayerBikeController>();
+
+        Quaternion initialRotation = c.transform.rotation;
+        c.Body.linearVelocity = c.transform.forward * 5f;
+
+        Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+        Set(gamepad.leftStick, new Vector2(1f, 0f));
+        yield return null; // PlayerInputReader.Update reads Turn.
+
+        for (int i = 0; i < 20; i++)
+        {
+            yield return new WaitForFixedUpdate();
+        }
+
+        float yawDelta = Quaternion.Angle(initialRotation, c.transform.rotation);
+        Assert.Greater(yawDelta, 1f, "Turn input should rotate the bike root heading.");
+
+        Vector3 flatVelocity = Vector3.ProjectOnPlane(c.Body.linearVelocity, Vector3.up);
+        Assert.Greater(flatVelocity.magnitude, 0.1f, "Bike should retain forward velocity while steering.");
+        Assert.Greater(Vector3.Dot(flatVelocity.normalized, c.transform.forward), 0.95f,
+            "Grounded movement velocity should follow the steered heading.");
+
+        LogAssert.NoUnexpectedReceived();
+#else
+        Assert.Ignore("PlayMode steering tests require the editor (AssetDatabase).");
+        yield break;
+#endif
+    }
+
+    [UnityTest]
+    public IEnumerator BankedGroundWithoutTurnInput_DoesNotRotateHeading()
+    {
+#if UNITY_EDITOR
+        _ground = MakeGround(Quaternion.Euler(0f, 0f, 12f));
+        yield return SpawnPlayerAbove(_ground, 1.0f);
+        PlayerBikeController c = _player.GetComponent<PlayerBikeController>();
+
+        Vector3 initialForward = c.transform.forward;
+        c.Body.linearVelocity = initialForward * 5f;
+
+        for (int i = 0; i < 30; i++)
+        {
+            yield return new WaitForFixedUpdate();
+        }
+
+        float signedYaw = Vector3.SignedAngle(initialForward, c.transform.forward, Vector3.up);
+        Assert.AreEqual(0f, signedYaw, 0.25f,
+            "Terrain should not create hidden self-steering yaw in Ticket 3.1.");
+
+        LogAssert.NoUnexpectedReceived();
+#else
+        Assert.Ignore("PlayMode steering tests require the editor (AssetDatabase).");
         yield break;
 #endif
     }

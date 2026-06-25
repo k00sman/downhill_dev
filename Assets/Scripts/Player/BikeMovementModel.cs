@@ -41,7 +41,7 @@ namespace Downhill.Player
 
             forwardFlat.Normalize();
 
-            Vector3 forwardOnSlope = Vector3.ProjectOnPlane(forwardFlat, groundNormal);
+            Vector3 forwardOnSlope = ProjectHeadingOntoGroundPitch(forwardFlat, groundNormal);
             if (forwardOnSlope.sqrMagnitude < 1e-6f)
             {
                 return velocity; // heading parallel to the normal — avoid NaN
@@ -74,6 +74,17 @@ namespace Downhill.Player
             }
 
             return result;
+        }
+
+        private static Vector3 ProjectHeadingOntoGroundPitch(Vector3 forwardFlat, Vector3 groundNormal)
+        {
+            if (Mathf.Abs(groundNormal.y) < 1e-4f)
+            {
+                return forwardFlat;
+            }
+
+            float verticalPerHorizontalMeter = -Vector3.Dot(groundNormal, forwardFlat) / groundNormal.y;
+            return forwardFlat + (Vector3.up * verticalPerHorizontalMeter);
         }
     }
 }

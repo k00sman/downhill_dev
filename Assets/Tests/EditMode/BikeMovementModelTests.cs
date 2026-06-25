@@ -144,6 +144,23 @@ public class BikeMovementModelTests
     }
 
     [Test]
+    public void SideBankedDownhill_DoesNotInjectSidewaysVelocity()
+    {
+        BikeMovementModel m = MakeModel();
+        m.drag = 0f;
+        m.gravity = 0f;
+
+        Vector3 velocity = Vector3.forward * 5f;
+        Vector3 groundNormal = new Vector3(0.25f, 0.9f, 0.25f).normalized;
+
+        Vector3 result = m.Step(velocity, Vector3.forward, groundNormal, 0f, 0.02f);
+
+        Assert.AreEqual(0f, result.x, 0.001f,
+            "Banked terrain should not drag the bike sideways when the player is not steering.");
+        Assert.AreEqual(5f, Vector3.Dot(result, Vector3.forward), 0.001f);
+    }
+
+    [Test]
     public void SteepUphill_CapsUpwardLaunchVelocity()
     {
         BikeMovementModel m = MakeModel();

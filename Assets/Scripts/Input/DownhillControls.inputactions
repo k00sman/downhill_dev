@@ -7,11 +7,11 @@
             "actions": [
                 { "name": "PedalLeft",  "type": "Button", "id": "a2000001-0000-4000-8000-000000000001", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
                 { "name": "PedalRight", "type": "Button", "id": "a2000002-0000-4000-8000-000000000002", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "FrontBrake", "type": "Value",  "id": "a2000003-0000-4000-8000-000000000003", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
-                { "name": "RearBrake",  "type": "Value",  "id": "a2000004-0000-4000-8000-000000000004", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
-                { "name": "Turn",       "type": "Value",  "id": "a2000005-0000-4000-8000-000000000005", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "FrontBrake", "type": "PassThrough", "id": "a2000003-0000-4000-8000-000000000003", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "RearBrake",  "type": "PassThrough", "id": "a2000004-0000-4000-8000-000000000004", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "Turn",       "type": "PassThrough", "id": "a2000005-0000-4000-8000-000000000005", "expectedControlType": "Axis",    "processors": "", "interactions": "", "initialStateCheck": false },
                 { "name": "Jump",       "type": "Button", "id": "a2000006-0000-4000-8000-000000000006", "expectedControlType": "Button",  "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Freelook",   "type": "Value",  "id": "a2000007-0000-4000-8000-000000000007", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true }
+                { "name": "Freelook",   "type": "PassThrough", "id": "a2000007-0000-4000-8000-000000000007", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": false }
             ],
             "bindings": [
                 { "name": "", "id": "b0000001-0000-4000-8000-000000000001", "path": "<Keyboard>/leftArrow",  "interactions": "", "processors": "", "groups": "Keyboard&Mouse", "action": "PedalLeft",  "isComposite": false, "isPartOfComposite": false },

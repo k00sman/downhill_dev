@@ -5,6 +5,10 @@
 ```mermaid
 classDiagram
 
+    %% namespace: (global)
+    class LeafPileTrigger {
+    }
+
     %% namespace: Downhill.Input
     class BikeActions {
         <<struct>>
@@ -73,6 +77,13 @@ classDiagram
         Crashed
         Recovering
     }
+    class BikeSteeringModel {
+        +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, float dt)
+        +float turnRateDegreesPerSecond
+        +float maxYawDeltaDegrees
+        +float minSpeedForSteering
+        +float turnDeadzone
+    }
     class PlayerBikeController {
         +Rigidbody Body
         +PlayerInputReader Input
@@ -85,6 +96,7 @@ classDiagram
         +void AddPedalPower(float amount)
         -PlayerInputReader _input
         -BikeMovementModel _movement
+        -BikeSteeringModel _steering
     }
 
     %% namespace: EnvironmentScatter
@@ -131,6 +143,7 @@ classDiagram
     PlayerBikeController --> BikeState : State
     PlayerBikeController --> PlayerInputReader : _input
     PlayerBikeController --> BikeMovementModel : _movement
+    PlayerBikeController --> BikeSteeringModel : _steering
     EnvironmentScatterManager --> SplineZone : zones
     SplineZone --> ZoneType : zoneType
     SplineZone --> WeightedPrefab : assets

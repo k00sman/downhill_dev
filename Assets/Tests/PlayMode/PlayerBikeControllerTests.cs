@@ -30,7 +30,7 @@ public class PlayerBikeControllerTests
         Assert.IsNotNull(controller.GroundCheck, "GroundCheck not wired");
         Assert.IsNotNull(controller.RecoveryAnchor, "RecoveryAnchor not wired");
 
-        Object.Destroy(instance);
+        Object.DestroyImmediate(instance);
 #else
         Assert.Ignore("PlayMode prefab test requires the editor (AssetDatabase).");
         yield break;
@@ -38,7 +38,7 @@ public class PlayerBikeControllerTests
     }
 
     [UnityTest]
-    public IEnumerator Prefab_FreezesYawUntilSteeringExists()
+    public IEnumerator Prefab_KeepsPhysicsRotationFrozenForCodeOwnedYaw()
     {
 #if UNITY_EDITOR
         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
@@ -52,12 +52,12 @@ public class PlayerBikeControllerTests
         Assert.IsTrue((constraints & RigidbodyConstraints.FreezeRotationX) != 0,
             "Pitch must stay locked until crash/air control is implemented.");
         Assert.IsTrue((constraints & RigidbodyConstraints.FreezeRotationY) != 0,
-            "Yaw must stay locked until steering is implemented.");
+            "Physics yaw must stay locked so only controller-owned steering rotates the bike.");
         Assert.IsTrue((constraints & RigidbodyConstraints.FreezeRotationZ) != 0,
             "Roll must stay locked until visual lean/physics are implemented.");
         LogAssert.NoUnexpectedReceived();
 
-        Object.Destroy(instance);
+        Object.DestroyImmediate(instance);
 #else
         Assert.Ignore("PlayMode prefab test requires the editor (AssetDatabase).");
         yield break;
@@ -86,13 +86,13 @@ public class PlayerBikeControllerTests
         PlayerBikeController controller = instance.GetComponent<PlayerBikeController>();
         Assert.IsNotNull(controller);
         Assert.IsTrue((controller.Body.constraints & RigidbodyConstraints.FreezeRotation) == RigidbodyConstraints.FreezeRotation,
-            "Root Rigidbody should remain fully rotation-frozen.");
+            "Root Rigidbody physics rotation should remain fully frozen.");
         Assert.Greater(Mathf.Abs(controller.BikeBody.localEulerAngles.x), 1f,
             "BikeBody should visually pitch on sloped ground.");
 
         LogAssert.NoUnexpectedReceived();
-        Object.Destroy(instance);
-        Object.Destroy(ground);
+        Object.DestroyImmediate(instance);
+        Object.DestroyImmediate(ground);
 #else
         Assert.Ignore("PlayMode prefab test requires the editor (AssetDatabase).");
         yield break;

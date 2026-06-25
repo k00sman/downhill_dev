@@ -9,13 +9,18 @@ public class LeafPileTrigger : MonoBehaviour
     [SerializeField] private bool hideOnTrigger = true;
     [SerializeField] private MeshRenderer leafMesh;
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag(playerTag)) return;
+        if (!other.CompareTag(playerTag))
+        {
+            return;
+        }
 
         leafParticles.Play();
 
         if (hideOnTrigger && leafMesh != null)
+        {
             leafMesh.enabled = false;
+        }
     }
 }

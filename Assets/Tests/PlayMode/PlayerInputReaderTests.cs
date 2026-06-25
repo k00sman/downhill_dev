@@ -7,27 +7,43 @@ using UnityEngine.TestTools;
 
 public class PlayerInputReaderTests : InputTestFixture
 {
+    private GameObject _readerObject;
+
+    [SetUp]
+    public override void Setup()
+    {
+        base.Setup();
+    }
+
+    [TearDown]
+    public override void TearDown()
+    {
+        if (_readerObject != null)
+        {
+            Object.DestroyImmediate(_readerObject);
+        }
+
+        base.TearDown();
+    }
+
     [UnityTest]
     public IEnumerator Turn_ReflectsGamepadLeftStickX()
     {
-        Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
-        GameObject go = new("reader");
-        PlayerInputReader reader = go.AddComponent<PlayerInputReader>();
-        yield return null; // Awake + OnEnable run
+        Gamepad gamepad = AddDefaultDevices();
+        PlayerInputReader reader = CreateReader();
+        yield return null; // Awake runs, then Update can poll controls.
 
         Set(gamepad.leftStick, new Vector2(1f, 0f));
         yield return null; // Update reads the value
 
         Assert.Greater(reader.Turn, 0.5f, "Turn should follow left stick X deflection");
-        Object.Destroy(go);
     }
 
     [UnityTest]
     public IEnumerator PedalLeftPressed_FiresOnLeftShoulder()
     {
-        Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
-        GameObject go = new("reader");
-        PlayerInputReader reader = go.AddComponent<PlayerInputReader>();
+        Gamepad gamepad = AddDefaultDevices();
+        PlayerInputReader reader = CreateReader();
         bool fired = false;
         reader.PedalLeftPressed += () => fired = true;
         yield return null;
@@ -36,6 +52,19 @@ public class PlayerInputReaderTests : InputTestFixture
         yield return null;
 
         Assert.IsTrue(fired, "PedalLeftPressed should fire when the left bumper is pressed");
-        Object.Destroy(go);
+        LogAssert.NoUnexpectedReceived();
+    }
+
+    private static Gamepad AddDefaultDevices()
+    {
+        InputSystem.AddDevice<Keyboard>();
+        InputSystem.AddDevice<Mouse>();
+        return InputSystem.AddDevice<Gamepad>();
+    }
+
+    private PlayerInputReader CreateReader()
+    {
+        _readerObject = new GameObject("reader");
+        return _readerObject.AddComponent<PlayerInputReader>();
     }
 }

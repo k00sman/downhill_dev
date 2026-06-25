@@ -28,6 +28,9 @@ namespace Downhill.Player
         [Header("Movement (Ticket 2.1)")]
         [SerializeField] private BikeMovementModel _movement = new();
 
+        [Header("Steering (Ticket 3.1)")]
+        [SerializeField] private BikeSteeringModel _steering = new();
+
         [Header("Ground probe")]
         [SerializeField] private LayerMask _groundMask = ~0;
         [SerializeField] private float _groundProbeDistance = 0.6f;
@@ -78,8 +81,8 @@ namespace Downhill.Player
             RequireRef(_recoveryAnchor, nameof(_recoveryAnchor));
 
             // The narrow, high-COM bike body would topple as a free Rigidbody.
-            // Freeze all rotation until steering owns yaw intentionally
-            // (Ticket 3.1). Visual lean lives on BikeBody, not here.
+            // Physics rotation stays locked; yaw is set explicitly by the
+            // steering model so contact impulses cannot turn the bike.
             if (_body != null)
             {
                 _body.constraints |= RigidbodyConstraints.FreezeRotation;
@@ -154,11 +157,32 @@ namespace Downhill.Player
                 return; // airborne: Rigidbody gravity owns the arc
             }
 
+            ApplySteering(dt);
             UpdateVisualTerrainPitch(groundNormal, dt);
 
             float pedal01 = _pedalPowerMax > 0f ? _pedalPower / _pedalPowerMax : 0f;
             _body.linearVelocity = _movement.Step(
                 _body.linearVelocity, transform.forward, groundNormal, pedal01, dt);
+        }
+
+        private void ApplySteering(float dt)
+        {
+            if (_steering == null)
+            {
+                return;
+            }
+
+            float turn = _input != null ? _input.Turn : 0f;
+            float yawDelta = _steering.StepYawDeltaDegrees(
+                transform.forward, _body.linearVelocity, turn, dt);
+            if (Mathf.Approximately(yawDelta, 0f))
+            {
+                return;
+            }
+
+            Quaternion targetRotation = Quaternion.AngleAxis(yawDelta, Vector3.up) * transform.rotation;
+            _body.rotation = targetRotation;
+            transform.rotation = targetRotation;
         }
 
         private bool TryProbeGround(out RaycastHit bestHit, out Vector3 averagedNormal)

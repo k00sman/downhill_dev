@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.Utilities;
 
 namespace Downhill.Input
 {
@@ -9,6 +11,9 @@ namespace Downhill.Input
     public class PlayerInputReader : MonoBehaviour
     {
         private DownhillControls _controls;
+        private bool _pedalLeftWasPressed;
+        private bool _pedalRightWasPressed;
+        private bool _jumpWasPressed;
 
         public float Turn { get; private set; }
         public float FrontBrake { get; private set; }
@@ -25,22 +30,16 @@ namespace Downhill.Input
             _controls = new DownhillControls();
         }
 
-        private void OnEnable()
-        {
-            DownhillControls.BikeActions bike = _controls.Bike;
-            bike.Enable();
-            bike.PedalLeft.performed += OnPedalLeft;
-            bike.PedalRight.performed += OnPedalRight;
-            bike.Jump.performed += OnJump;
-        }
-
         private void OnDisable()
         {
-            DownhillControls.BikeActions bike = _controls.Bike;
-            bike.PedalLeft.performed -= OnPedalLeft;
-            bike.PedalRight.performed -= OnPedalRight;
-            bike.Jump.performed -= OnJump;
-            bike.Disable();
+            Turn = 0f;
+            FrontBrake = 0f;
+            RearBrake = 0f;
+            Freelook = Vector2.zero;
+            JumpedThisFrame = false;
+            _pedalLeftWasPressed = false;
+            _pedalRightWasPressed = false;
+            _jumpWasPressed = false;
         }
 
         private void OnDestroy()
@@ -51,26 +50,141 @@ namespace Downhill.Input
         private void Update()
         {
             DownhillControls.BikeActions bike = _controls.Bike;
-            Turn = bike.Turn.ReadValue<float>();
-            FrontBrake = bike.FrontBrake.ReadValue<float>();
-            RearBrake = bike.RearBrake.ReadValue<float>();
-            Freelook = bike.Freelook.ReadValue<Vector2>();
-            JumpedThisFrame = bike.Jump.WasPerformedThisFrame();
+            bool pedalLeftPressed = ReadButton(bike.PedalLeft);
+            bool pedalRightPressed = ReadButton(bike.PedalRight);
+            bool jumpPressed = ReadButton(bike.Jump);
+
+            if (pedalLeftPressed && !_pedalLeftWasPressed)
+            {
+                PedalLeftPressed?.Invoke();
+            }
+
+            if (pedalRightPressed && !_pedalRightWasPressed)
+            {
+                PedalRightPressed?.Invoke();
+            }
+
+            JumpedThisFrame = jumpPressed && !_jumpWasPressed;
+            if (JumpedThisFrame)
+            {
+                Jumped?.Invoke();
+            }
+
+            _pedalLeftWasPressed = pedalLeftPressed;
+            _pedalRightWasPressed = pedalRightPressed;
+            _jumpWasPressed = jumpPressed;
+
+            Turn = ReadAxis(bike.Turn);
+            FrontBrake = ReadAxis(bike.FrontBrake);
+            RearBrake = ReadAxis(bike.RearBrake);
+            Freelook = ReadVector2(bike.Freelook);
         }
 
-        private void OnPedalLeft(InputAction.CallbackContext _)
+        private static bool ReadButton(InputAction action)
         {
-            PedalLeftPressed?.Invoke();
+            foreach (InputBinding binding in action.bindings)
+            {
+                if (binding.isComposite || string.IsNullOrEmpty(binding.effectivePath))
+                {
+                    continue;
+                }
+
+                using InputControlList<InputControl> controls = InputSystem.FindControls(binding.effectivePath);
+                foreach (InputControl control in controls)
+                {
+                    if (control.device == null || !control.device.added)
+                    {
+                        continue;
+                    }
+
+                    if (control is ButtonControl button && button.isPressed)
+                    {
+                        return true;
+                    }
+
+                    if (control is AxisControl axis && axis.ReadValue() > 0.5f)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
-        private void OnPedalRight(InputAction.CallbackContext _)
+        private static float ReadAxis(InputAction action)
         {
-            PedalRightPressed?.Invoke();
+            float value = 0f;
+
+            foreach (InputBinding binding in action.bindings)
+            {
+                if (binding.isComposite || string.IsNullOrEmpty(binding.effectivePath))
+                {
+                    continue;
+                }
+
+                float sign = 1f;
+                if (binding.isPartOfComposite)
+                {
+                    if (string.Equals(binding.name, "negative", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sign = -1f;
+                    }
+                    else if (!string.Equals(binding.name, "positive", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                }
+
+                using InputControlList<InputControl> controls = InputSystem.FindControls(binding.effectivePath);
+                foreach (InputControl control in controls)
+                {
+                    if (control.device == null || !control.device.added)
+                    {
+                        continue;
+                    }
+
+                    if (control is AxisControl axis)
+                    {
+                        value += axis.ReadValue() * sign;
+                    }
+                    else if (control is ButtonControl button && button.isPressed)
+                    {
+                        value += sign;
+                    }
+                }
+            }
+
+            return Mathf.Clamp(value, -1f, 1f);
         }
 
-        private void OnJump(InputAction.CallbackContext _)
+        private static Vector2 ReadVector2(InputAction action)
         {
-            Jumped?.Invoke();
+            Vector2 value = Vector2.zero;
+
+            foreach (InputBinding binding in action.bindings)
+            {
+                if (binding.isComposite || binding.isPartOfComposite || string.IsNullOrEmpty(binding.effectivePath))
+                {
+                    continue;
+                }
+
+                using InputControlList<InputControl> controls = InputSystem.FindControls(binding.effectivePath);
+                foreach (InputControl control in controls)
+                {
+                    if (control.device == null || !control.device.added)
+                    {
+                        continue;
+                    }
+
+                    if (control is Vector2Control vector)
+                    {
+                        value += vector.ReadValue();
+                    }
+                }
+            }
+
+            return value;
         }
     }
 }
