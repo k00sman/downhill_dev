@@ -96,6 +96,7 @@ Shader "Retro Shaders Pro/Retro Lit"
 			#pragma target 3.0
 
             #pragma multi_compile_fog
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
@@ -396,6 +397,11 @@ Shader "Retro Shaders Pro/Retro Lit"
 			{
 				UNITY_SETUP_INSTANCE_ID(i);
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
+				// LOD crossfade dither
+				#ifdef LOD_FADE_CROSSFADE
+					clip(unity_LODFade.x - dither(float3(unity_LODFade.x, unity_LODFade.x, unity_LODFade.x), i.positionCS.xy).x);
+				#endif
 
 				// Apply resolution limit to the base texture.
 				int targetResolution = (int)log2(_ResolutionLimit);

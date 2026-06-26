@@ -37,6 +37,7 @@ Shader "Custom/CylindricalBillboard"
             // URP lighting features
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
             #pragma multi_compile_fog
 
             // Disable shadow receiving
@@ -71,7 +72,18 @@ Shader "Custom/CylindricalBillboard"
                 float3 normalWS   : TEXCOORD2;
                 float  fogFactor  : TEXCOORD3;
             };
-
+			
+            float Dither4x4(float2 screenPos)
+            {
+                float2 pos = fmod(screenPos, 4.0);
+                float4x4 m = float4x4(
+                    -0.5,     0.5,   -0.375,  0.625,
+                     0.25,  -0.75,    0.375, -0.625,
+                    -0.25,   0.75,   -0.125,  0.875,
+                     1.0,   -1.0,     0.125, -0.875);
+                return m[int(pos.x)][int(pos.y)];
+            }
+			
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
@@ -112,6 +124,10 @@ Shader "Custom/CylindricalBillboard"
 
             half4 frag(Varyings IN) : SV_Target
             {
+			    #ifdef LOD_FADE_CROSSFADE
+               clip(unity_LODFade.x - Dither4x4(IN.positionCS.xy));
+                #endif
+				
                 // Sample albedo + alpha
                 half4 albedoSample = SAMPLE_TEXTURE2D(_Albedo, sampler_Albedo, IN.uv);
 

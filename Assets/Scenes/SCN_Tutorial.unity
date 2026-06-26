@@ -227,18 +227,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnvironmentScatter.SplineZone
   zoneType: 1
-  minSpacing: 1.5
+  minSpacing: 3
   assets:
   - prefab: {fileID: 719180376}
     weight: 3
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 6184304}
-    weight: 10.9
+    weight: 3.2
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 1637632199}
-    weight: 7.5
+    weight: 2.8
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 1737698513}
@@ -1140,18 +1140,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnvironmentScatter.SplineZone
   zoneType: 1
-  minSpacing: 1.5
+  minSpacing: 3
   assets:
   - prefab: {fileID: 719180376}
     weight: 4.1
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 6184304}
-    weight: 10.5
+    weight: 2.8
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 1637632199}
-    weight: 6.4
+    weight: 2
     minScaleMultiplier: 0
     maxScaleMultiplier: 0
   - prefab: {fileID: 1737698513}
@@ -1911,18 +1911,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1899200100762970399, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 126
-      objectReference: {fileID: 0}
-    - target: {fileID: 2653309267297134826, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -200
-      objectReference: {fileID: 0}
-    - target: {fileID: 4965104449362560418, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
-      propertyPath: m_MaterialTemplate
-      value: 
-      objectReference: {fileID: 2100000, guid: 6e7c6620e1fb9354688eee5e01ea3719, type: 2}
     - target: {fileID: 7319712804705363288, guid: 1a0e0bf1a62c2854d8bc3d9d2a37a94f, type: 3}
       propertyPath: m_Name
       value: TRN_01
