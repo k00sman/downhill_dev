@@ -6,12 +6,17 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 
 | Sprint | File | Goal question | Status |
 |--------|------|---------------|--------|
+| Sprint 0 — Agentic Workflow & Tooling | [`docs/sprints/sprint-0-best-practices.md`](sprints/sprint-0-best-practices.md) | Are our agent workflows fast, safe, and cross-tool? | In progress |
 | Sprint 1 — Core Ride | [`docs/sprints/sprint-1-core-ride.md`](sprints/sprint-1-core-ride.md) | Can we ride the trail at all? | In progress |
 | Sprint 2 — Advanced Input | [`docs/sprints/sprint-2-advanced-input.md`](sprints/sprint-2-advanced-input.md) | Does input feel distinctive and risky? | Not started |
 | Sprint 3 — Crashes | [`docs/sprints/sprint-3-crashes.md`](sprints/sprint-3-crashes.md) | Do mistakes feel meaningful? | Not started |
 | Sprint 4 — Survival | [`docs/sprints/sprint-4-survival.md`](sprints/sprint-4-survival.md) | Does death feel fair? | Not started |
 | Sprint 5 — The Chase | [`docs/sprints/sprint-5-the-chase.md`](sprints/sprint-5-the-chase.md) | Does the monster create pressure? | Not started |
 | Sprint 6 — Readability | [`docs/sprints/sprint-6-readability.md`](sprints/sprint-6-readability.md) | Can we tune and read the prototype? | Not started |
+
+> **Sprint 0** is a meta/tooling sprint (agent workflow), not part of the gameplay
+> phase order below. Its tickets live in its own file and are not duplicated in the
+> gameplay phase/roster tables.
 
 ## Phase order
 

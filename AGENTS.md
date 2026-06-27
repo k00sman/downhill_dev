@@ -20,7 +20,51 @@ This repo is worked on by multiple people across **Linux, macOS, and Windows**. 
 - New gameplay code lives in focused **assembly definitions** (e.g. `Downhill.Input` asmdef at `Assets/Scripts/Input/`). Keep risky mechanics isolated in their own files so they can be replaced.
 - **`.meta` files MUST be committed** alongside their asset/script. Never leave a new file without its meta.
 - **Third-party content under `Assets/` is off-limits** — do not modify it: PathCreator, Retro Shaders Pro, Adrift Team, and other vendor folders.
+- **Prefer first-party (Unity / official) packages; avoid adding new third-party code or dependencies** unless there is no official option (then flag it for sign-off). Agent skills/commands and external agents are exempt — they are tooling, not shipped game code. This governs *new* deps; existing vendor assets stay (and stay unmodified, per the rule above).
 - **Before grepping or exploring `Assets/Scripts/` to understand the codebase, READ `docs/codemap.md` first.** It is a Mermaid class diagram of all gameplay types, their fields, public methods, and cross-type dependencies — faster than grepping. Regenerate it if it looks stale (see Workflow section for commands).
+- **Context hygiene:** rely on `.gitignore` (both tools honor it) to keep `Library/`, `Logs/`, `obj/`, and build output out of context — do not add a tool-specific ignore file.
+
+## Agent skills & commands (cross-tool)
+
+This repo is driven by **both Claude Code and OpenAI Codex**. Anything reusable
+(a skill, command, or template) is authored **once, tool-neutrally**, then
+exposed to each tool through a thin wrapper:
+
+- **Canonical playbook** — the real procedure/template lives in
+  `docs/playbooks/<name>.md`, written in terms of actions (read a file, create a
+  file, run a command), never a single tool's API.
+- **Claude Code wrapper** — `.claude/skills/<name>/SKILL.md`, body = "Follow the playbook." Invoked as `/<name>`.
+- **Codex wrapper** — `.agents/skills/<name>/SKILL.md` (the **same** `SKILL.md`
+  format), body = "Follow the playbook." Invoked via `/skills`. Both wrappers
+  are skills; Codex's deprecated `~/.codex/prompts/` custom prompts are not used
+  (home-only, not repo-shared).
+- `AGENTS.md` is the shared contract both tools read (`CLAUDE.md` only points to
+  it). Put rules here, not in a tool-specific file. See `docs/playbooks/README.md`
+  for the full standard.
+
+Never add a Claude-only or Codex-only behavior the other tool can't follow.
+
+## Model-tiered delegation (cost discipline)
+
+Match the model to the task — don't burn a heavy reasoning model on mechanical
+work. When delegating to a subagent, classify the task and pick the **cheapest
+model that can do it well**:
+
+- **Trivial / mechanical → smallest model** (Claude **Haiku**; Codex's small
+  tier): boilerplate, file moves, mechanical or templated edits, running a
+  documented command, single-file scaffolds from a clear template,
+  grep-and-summarize.
+- **Moderate → mid model** (Claude **Sonnet**): well-scoped work against a clear
+  spec, tests from a known pattern, multi-file but bounded changes, authoring a
+  playbook/skill once the pattern exists.
+- **Complex / design / ambiguous → top model** (Claude **Opus**): architecture,
+  brainstorming, cross-cutting refactors, anything with real design decisions or
+  unclear requirements.
+
+The orchestrator stays cheap by **handing mechanical subtasks down**, not doing
+them itself. When torn between two tiers, pick the smaller and escalate only if
+it actually struggles. Tool-neutral: each tool maps these tiers to its own model
+menu (Claude Code sets a subagent's model; Codex selects per session).
 
 ## Input
 
@@ -65,6 +109,22 @@ This repo is worked on by multiple people across **Linux, macOS, and Windows**. 
   (whitespace) staged in-scope files, re-stages them, and blocks commits with
   `error`-tier findings (bypass with `git commit --no-verify`).
 
+## Unity MCP (optional, Editor-open)
+
+An optional **official Unity MCP** server (`com.unity.ai.assistant`) lets agents
+inspect a running Editor — scenes, GameObjects, console, screenshots. It is
+**Editor-open only** — not a headless/CI path. The official package exposes **no
+test-runner tool**, so run tests from the Unity Test Runner window (above), not
+via MCP. Three safety layers apply: Unity's per-client connection approval (Accept
+under `Edit > Project Settings > AI > Unity MCP`), Unity's per-tool enable/disable
+toggle (it ships with a command-runner and a mutator **on** — curate down to
+read-only), and our per-call gating in `docs/playbooks/unity-mcp-allowlist.md`
+(read/query/log tools are free; scene/asset/script/package mutation, code
+generation, and the combined-verb `Manage*` tools need an explicit plan step +
+confirmation each time). Setup is not committed by default — see
+`docs/playbooks/unity-mcp-allowlist.md` and Ticket 0.5. Prefer this official
+package over third-party Unity-MCP bridges.
+
 ## Workflow (specs / plans / tickets)
 
 - Feature work follows **brainstorm → spec → plan → execute**.
@@ -86,6 +146,7 @@ This repo is worked on by multiple people across **Linux, macOS, and Windows**. 
   - Linux / macOS: `bash scripts/generate-codemap.sh`
   - Windows (PowerShell): `pwsh scripts/generate-codemap.ps1`
   - Any platform (fallback): `dotnet run --project tools/codemap/codemap.csproj -- <repo-root>`
+- Before a large or structural refactor, commit or stash first so there is a clean rollback point, and note this in the plan.
 
 ## Changelog — read and update it
 

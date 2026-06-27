@@ -11,6 +11,65 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **Steering input pipeline (Ticket 3.1)** — 2026-06-25
+  - Added a pure `BikeSteeringModel` for bounded, tunable yaw steering with
+    terrain camber self-turning away from raised elevation.
+  - Wired `PlayerBikeController` to keep Rigidbody physics rotation frozen while
+    applying code-owned yaw before movement.
+  - Changed terrain steering to use explicit left/right height probes instead
+    of raw averaged ground normals, reducing random self-turning on noisy
+    terrain.
+  - Added EditMode steering model coverage and PlayMode steering integration
+    coverage for prefab constraints, input-driven heading changes, and
+    banked-ground heading influence without pitch-only yaw drift.
+
+- **Unity MCP safety policy + setup prep (Sprint 0, T0.5)** — 2026-06-25
+  - Added `docs/playbooks/unity-mcp-allowlist.md` (read-only vs. confirm-gated
+    tool policy + human setup steps) and an `AGENTS.md` Unity-MCP safety note.
+    Selected the official `com.unity.ai.assistant` MCP server (Editor-open) over
+    third-party bridges; install + client-config are prepped for a human to apply
+    (needs a running Editor) and are not committed.
+  - Added an `AGENTS.md` rule to prefer first-party packages and avoid new
+    third-party dependencies (skills/agents excepted).
+
+- **Workflow tooling polish (Sprint 0 follow-up)** — 2026-06-26
+  - Added the `workflow-review` cross-tool skill — periodically reviews the dev
+    workflow itself (`AGENTS.md`, playbooks, toolchain) against first-party best
+    practices and proposes changes for approval. Guardrails: untrusted web,
+    propose-never-apply, high bar for change. Distinct from `session-self-eval`
+    (compliance) — this one is evolution.
+  - Removed the throwaway `example-cross-tool-check` reference entry (its role is
+    covered by `docs/playbooks/README.md` + the real skills) and the now-distilled
+    source `docs/agenticdev.md`, trimming per-session skill context.
+
+- **Cross-tool authoring standard (Sprint 0, T0.1)** — 2026-06-24
+  - Added `docs/playbooks/` with the canonical-playbook + thin-per-tool-wrapper
+    standard (`README.md`) and a reference entry (`example-cross-tool-check`),
+    proven with both wrappers: `.claude/skills/...` (Claude Code) and
+    `.agents/skills/...` (Codex).
+  - Corrected the `AGENTS.md` cross-tool section to the verified Codex **skills**
+    path (`.agents/skills/`); the deprecated `~/.codex/prompts/` custom-prompt
+    path is not used.
+
+- **Cross-tool agent skills (Sprint 0: T0.2–T0.4, T0.6)** — 2026-06-24
+  - `unity-monobehaviour-template` — generate a convention-compliant MonoBehaviour.
+  - `unity-test-gen` — scaffold EditMode/PlayMode tests (InputTestFixture-aware).
+  - `unity-research` / `unity-refactor` — structured codebase research; allowlist-scoped, diff-only refactors.
+  - `session-self-eval` — audit a session against `AGENTS.md` + the backlog.
+  - Each authored as a `docs/playbooks/` playbook with both `.claude/skills/` and
+    `.agents/skills/` wrappers, per the T0.1 standard.
+
+- **Model-tiered delegation rule** — 2026-06-24
+  - `AGENTS.md` now directs agents to classify task difficulty and delegate
+    mechanical work to smaller, cheaper models (Haiku / Sonnet) to save tokens.
+
+- **Agentic workflow & tooling (Sprint 0) backlog** — 2026-06-24
+  - Added `Sprint 0 — Agentic Workflow & Tooling` (`docs/sprints/sprint-0-best-practices.md`),
+    reconciling `docs/agenticdev.md` recommendations with the existing AGENTS.md workflow.
+  - Added cross-tool (Claude Code + Codex) skill/command authoring rules, a
+    context-hygiene rule, and a pre-refactor git-safety rule to `AGENTS.md`.
+  - Registered Sprint 0 in `docs/TICKETS.md`.
+
 - **C# linter for gameplay code** — 2026-06-24
   - Self-contained `tools/lint/` project + `scripts/lint.{sh,ps1}`: Phase 1
     auto-fixes whitespace plus a safe allowlist of style fixes (explicit types,
@@ -94,6 +153,17 @@ versions yet. All entries currently live under [Unreleased].
   - Added a `.gitignore` rule for auto-generated
     `Assets/Resources/PerformanceTestRun*.json` files produced by the
     performance-testing package.
+
+### Fixed
+
+- **Input reader PlayMode initial-state callback** — 2026-06-25
+  - Changed polled controls (`FrontBrake`, `RearBrake`, `Turn`, `Freelook`) to
+    `PassThrough` actions in both the input asset and generated wrapper, avoiding
+    the Input System's automatic `Value`-action initial-state callback path in
+    PlayMode tests.
+  - Updated PlayMode input tests to register keyboard, mouse, and gamepad
+    devices under `InputTestFixture` before enabling the shipped action map, and
+    enabled input actions explicitly in `PlayerInputReader`.
 
 ## Conventions
 
