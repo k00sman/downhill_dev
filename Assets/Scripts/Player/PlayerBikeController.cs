@@ -11,8 +11,8 @@ namespace Downhill.Player
     }
 
     /// Player bicycle actor. Holds wiring/validation (Ticket 1.2) and the
-    /// downhill forward-movement loop: a grounded raycast feeds pure movement
-    /// and cadence models that drive Rigidbody velocity.
+    /// downhill movement loop: a grounded raycast feeds pure movement, steering,
+    /// and cadence models that drive Rigidbody velocity and heading.
     [RequireComponent(typeof(Rigidbody), typeof(PlayerInputReader))]
     public class PlayerBikeController : MonoBehaviour
     {
@@ -59,6 +59,10 @@ namespace Downhill.Player
         public bool IsGrounded { get; private set; }
         public float PedalPower { get; private set; }
         public Vector3 GroundNormal { get; private set; } = Vector3.up;
+        public Vector3 DownhillDirection { get; private set; }
+        public float ForwardSpeed { get; private set; }
+        public float LateralSpeed { get; private set; }
+        public float FallLineAlignmentDegrees { get; private set; }
 
         private void OnValidate()
         {
@@ -172,40 +176,44 @@ namespace Downhill.Player
 
             if (!IsGrounded)
             {
-                UpdateVisualTerrainPitch(Vector3.up, dt);
+                ClearGroundMovementTelemetry();
+                UpdateVisualTerrainPitch(Vector3.up, _body.rotation, dt);
                 return; // airborne: Rigidbody gravity owns the arc
             }
 
-            ApplySteering(dt, groundNormal);
-            UpdateVisualTerrainPitch(groundNormal, dt);
+            Quaternion bikeRotation = ApplySteering(dt, groundNormal);
+            UpdateVisualTerrainPitch(groundNormal, bikeRotation, dt);
 
             float pedal01 = _pedalPowerMax > 0f ? PedalPower / _pedalPowerMax : 0f;
             float frontBrakeInput = _input != null ? _input.FrontBrake : 0f;
             float rearBrakeInput = _input != null ? _input.RearBrake : 0f;
             float brakeDecel = _brake != null ? _brake.GetTotalBrakeDecel(frontBrakeInput, rearBrakeInput) : 0f;
 
-            _body.linearVelocity = _movement.Step(
-                _body.linearVelocity, transform.forward, groundNormal, pedal01, brakeDecel, dt);
+            BikeMovementResult movementResult = _movement.StepDetailed(
+                _body.linearVelocity, bikeRotation * Vector3.forward, groundNormal, pedal01, brakeDecel, dt);
+            _body.linearVelocity = movementResult.Velocity;
+            UpdateGroundMovementTelemetry(movementResult);
         }
 
-        private void ApplySteering(float dt, Vector3 groundNormal)
+        private Quaternion ApplySteering(float dt, Vector3 groundNormal)
         {
+            Quaternion currentRotation = _body != null ? _body.rotation : transform.rotation;
             if (_steering == null)
             {
-                return;
+                return currentRotation;
             }
 
             float turn = _input != null ? _input.Turn : 0f;
             float yawDelta = _steering.StepYawDeltaDegrees(
-                transform.forward, _body.linearVelocity, turn, groundNormal, dt);
+                currentRotation * Vector3.forward, _body.linearVelocity, turn, groundNormal, dt);
             if (Mathf.Approximately(yawDelta, 0f))
             {
-                return;
+                return currentRotation;
             }
 
-            Quaternion targetRotation = Quaternion.AngleAxis(yawDelta, Vector3.up) * transform.rotation;
-            _body.rotation = targetRotation;
-            transform.rotation = targetRotation;
+            Quaternion targetRotation = Quaternion.AngleAxis(yawDelta, Vector3.up) * currentRotation;
+            _body.MoveRotation(targetRotation);
+            return targetRotation;
         }
 
         private bool TryProbeGround(out RaycastHit bestHit, out Vector3 averagedNormal)
@@ -252,26 +260,43 @@ namespace Downhill.Player
             }
         }
 
-        private void UpdateVisualTerrainPitch(Vector3 groundNormal, float dt)
+        private void UpdateVisualTerrainPitch(Vector3 groundNormal, Quaternion bikeRotation, float dt)
         {
             if (_bikeBody == null)
             {
                 return;
             }
 
-            Vector3 slopeForward = Vector3.ProjectOnPlane(transform.forward, groundNormal);
+            Vector3 bikeForward = bikeRotation * Vector3.forward;
+            Vector3 slopeForward = Vector3.ProjectOnPlane(bikeForward, groundNormal);
             if (slopeForward.sqrMagnitude < 1e-6f)
             {
                 return;
             }
 
             slopeForward.Normalize();
-            float signedPitch = Vector3.SignedAngle(transform.forward, slopeForward, transform.right);
+            float signedPitch = Vector3.SignedAngle(bikeForward, slopeForward, bikeRotation * Vector3.right);
             signedPitch = Mathf.Clamp(signedPitch, -_maxVisualPitchDegrees, _maxVisualPitchDegrees);
 
             Quaternion target = Quaternion.Euler(signedPitch, 0f, 0f);
             float t = 1f - Mathf.Exp(-Mathf.Max(0f, _terrainPitchLerp) * dt);
             _bikeBody.localRotation = Quaternion.Slerp(_bikeBody.localRotation, target, t);
+        }
+
+        private void UpdateGroundMovementTelemetry(BikeMovementResult movementResult)
+        {
+            DownhillDirection = movementResult.DownhillDirection;
+            ForwardSpeed = movementResult.ForwardSpeed;
+            LateralSpeed = movementResult.LateralSpeed;
+            FallLineAlignmentDegrees = movementResult.FallLineAlignmentDegrees;
+        }
+
+        private void ClearGroundMovementTelemetry()
+        {
+            DownhillDirection = Vector3.zero;
+            ForwardSpeed = 0f;
+            LateralSpeed = 0f;
+            FallLineAlignmentDegrees = 0f;
         }
 
         private void RequireRef(Object reference, string fieldName)

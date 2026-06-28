@@ -80,6 +80,11 @@
   research task should explicitly prevent double-counting instability.
 - Prefer data assets or serializable settings for per-surface values so designers
   can tune grip, drag, max-speed scale, and instability without source edits.
+- As of 2026-06-28, the base bike model already supports downhill/lateral slip
+  through `BikeMovementModel.lateralGrip` and velocity/fall-line heading
+  alignment in `BikeSteeringModel`. Surface effects should modify that existing
+  grip/drift/drag/steering stack rather than adding a parallel tire or slide
+  simulation.
 
 ---
 

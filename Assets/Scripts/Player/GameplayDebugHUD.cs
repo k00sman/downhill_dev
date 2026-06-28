@@ -135,7 +135,7 @@ namespace Downhill.Player
 
             if (_showHUD)
             {
-                _panelRect.sizeDelta = new Vector2(320f, 250f);
+                _panelRect.sizeDelta = new Vector2(340f, 290f);
             }
             else
             {
@@ -174,6 +174,9 @@ namespace Downhill.Player
             string stateStr = _player.State.ToString();
             float health = 100f; // placeholder for health (Sprint 4)
             float pedalPower = _player.PedalPower;
+            float forwardSpeed = _player.ForwardSpeed;
+            float lateralSpeed = _player.LateralSpeed;
+            float fallLineAlignment = _player.FallLineAlignmentDegrees;
             Vector3 norm = _player.GroundNormal;
 
             // Input reads
@@ -220,6 +223,8 @@ namespace Downhill.Player
                          $"---------------------------------------------\n" +
                          $"<b>[BIKE STATUS]</b>\n" +
                          $"Speed: {speedMS:F1} m/s ({speedKmh:F1} km/h)\n" +
+                         $"Forward: {forwardSpeed:F1} m/s | Lateral: {lateralSpeed:F1} m/s\n" +
+                         $"Fall-Line Align: {fallLineAlignment:F0} deg\n" +
                          $"State: {stateStr}\n" +
                          $"Grounded: {(isGrounded ? "<color=green>YES</color>" : "<color=red>NO</color>")}\n" +
                          $"Normal: ({norm.x:F2}, {norm.y:F2}, {norm.z:F2})\n" +

@@ -124,6 +124,11 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 
 ### Sprint 9 — Surface & Terrain Handling
 
+> Note: the base bike model now includes downhill/lateral ground-plane drift,
+> `BikeMovementModel.lateralGrip`, and velocity/fall-line heading alignment.
+> Surface handling should modify those existing knobs instead of adding a
+> separate slide/tire simulation.
+
 | Ticket | Title | Status |
 |--------|-------|--------|
 | 9.1 | Define surface type system | Not started |

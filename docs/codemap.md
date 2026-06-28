@@ -74,12 +74,23 @@ classDiagram
     class BikeMovementModel {
         +Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float dt)
         +Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float brakeDecel, float dt)
+        +BikeMovementResult StepDetailed(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float brakeDecel, float dt)
         +float maxSpeed
         +float slopeDriveGain
         +float pedalAccel
         +float drag
+        +float lateralGrip
         +float gravity
         +float maxGroundedUpSpeed
+    }
+    class BikeMovementResult {
+        <<struct>>
+        +Vector3 Velocity
+        +Vector3 HorizontalVelocity
+        +Vector3 DownhillDirection
+        +float ForwardSpeed
+        +float LateralSpeed
+        +float FallLineAlignmentDegrees
     }
     class BikeState {
         <<enumeration>>
@@ -95,6 +106,12 @@ classDiagram
         +float minSpeedForSteering
         +float turnDeadzone
         +float slopeInfluence
+        +float slopeSteerResponse
+        +float velocityAlignmentMinSpeed
+        +float velocityAlignmentYawRateDegreesPerSecond
+        +float lowSpeedDownhillAlignmentYawRateDegreesPerSecond
+        +float downhillAlignmentMinSlopeDegrees
+        +float headingAlignmentDeadzoneDegrees
     }
     class CameraConfig {
         +float lookSensitivity
@@ -129,6 +146,10 @@ classDiagram
         +bool IsGrounded
         +float PedalPower
         +Vector3 GroundNormal
+        +Vector3 DownhillDirection
+        +float ForwardSpeed
+        +float LateralSpeed
+        +float FallLineAlignmentDegrees
         +void AddPedalPower(float amount)
         -PlayerInputReader _input
         -BikeMovementModel _movement

@@ -20,6 +20,13 @@ versions yet. All entries currently live under [Unreleased].
   - Normalized shipped pedal bindings to LMB/RMB and LT/RT, keeping brakes on
     W/S and LB/RB, with asset and generated-wrapper tests covering the mapping.
 
+- **Uphill fall-line handling handoff** — 2026-06-28
+  - Documented two candidate designs for uphill-stall recovery: low-speed
+    fall-line yaw on pedal drive, and broader downhill lateral drift with
+    velocity alignment.
+  - Captured implementation fit, tradeoffs, risks, testing approach, and a
+    recommendation to start with the smaller fall-line yaw assist.
+
 - **Bike-handling research recommendations applied to sprint docs** — 2026-06-28
   - Marked Sprint 1 status consistently complete in the sprint/index docs.
   - Added Sprint 2 guidance to normalize pedal inputs to LMB/RMB, isolate
@@ -215,6 +222,18 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Changed
 
+- **Bike smoothing and downhill tuning pass** — 2026-06-28
+  - Smoothed automatic turn-away-from-elevation steering, reduced that camber
+    steering influence by 20%, and reduced downhill speed cap/slope drive by 15%.
+  - Switched code-owned bike yaw to Rigidbody `MoveRotation` so interpolation can
+    smooth visible rotation.
+
+- **Bike ground-plane drift model** — 2026-06-28
+  - Replaced the forward-only grounded movement model with downhill/lateral
+    ground velocity, lateral grip damping, velocity/fall-line heading alignment,
+    and debug HUD readouts for forward speed, lateral slip, and fall-line
+    alignment.
+
 - **Bike speed tuning pass** — 2026-06-28
   - Reduced the forward speed cap, downhill slope drive, and pedal acceleration
     by 20% in both code defaults and the player prefab's serialized movement
@@ -228,8 +247,9 @@ versions yet. All entries currently live under [Unreleased].
     generated `Dispose()`, which logs EditMode errors because it uses `Destroy`.
 
 - **Stopped-uphill steering lock** — 2026-06-28
-  - Allowed steering input to yaw the bike when it is stopped facing uphill, so
-    the rider can turn back toward the descent instead of being locked in place.
+  - Replaced the temporary stopped-uphill manual steering escape with downhill
+    slip plus velocity/fall-line heading alignment, so uphill recovery comes
+    from the same movement model as side-slope drift.
 
 - **Player camera recentering removed** — 2026-06-28
   - Removed the freelook auto-recenter path from `BikeCameraController` and cleared the serialized recenter value from the tutorial scene.

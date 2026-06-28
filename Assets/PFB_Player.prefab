@@ -120,10 +120,11 @@ MonoBehaviour:
   _groundCheck: {fileID: 4961183217523439498}
   _recoveryAnchor: {fileID: 8220739475990105250}
   _movement:
-    maxSpeed: 16
-    slopeDriveGain: 0.4
+    maxSpeed: 13.6
+    slopeDriveGain: 0.34
     pedalAccel: 6.4
     drag: 0.02
+    lateralGrip: 6
     gravity: 9.81
     maxGroundedUpSpeed: 0.75
   _steering:
@@ -131,7 +132,13 @@ MonoBehaviour:
     maxYawDeltaDegrees: 8
     minSpeedForSteering: 0.5
     turnDeadzone: 0.15
-    slopeInfluence: 30
+    slopeInfluence: 24
+    slopeSteerResponse: 6
+    velocityAlignmentMinSpeed: 0.5
+    velocityAlignmentYawRateDegreesPerSecond: 45
+    lowSpeedDownhillAlignmentYawRateDegreesPerSecond: 70
+    downhillAlignmentMinSlopeDegrees: 5
+    headingAlignmentDeadzoneDegrees: 3
   _brake:
     frontBrakePower: 12
     rearBrakePower: 8
@@ -164,8 +171,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47dff9f6b55d487a4804fd7dd65bb072, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Downhill.Player::Downhill.Player.GameplayDebugHUD
+  _player: {fileID: 4083079753745822618}
   _showHUD: 1
-  _toggleKey: 284
 --- !u!1 &4789164619254481586
 GameObject:
   m_ObjectHideFlags: 0

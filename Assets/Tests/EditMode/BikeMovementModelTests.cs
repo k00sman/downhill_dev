@@ -9,11 +9,12 @@ public class BikeMovementModelTests
     {
         return new()
         {
-            maxSpeed = 16f,
-            slopeDriveGain = 0.4f,
+            maxSpeed = 13.6f,
+            slopeDriveGain = 0.34f,
             pedalAccel = 6.4f,
             drag = 0.02f,
             gravity = 9.81f,
+            lateralGrip = 6f,
         };
     }
 
@@ -73,14 +74,15 @@ public class BikeMovementModelTests
     }
 
     [Test]
-    public void Uphill_LowSpeed_DoesNotReverse()
+    public void Uphill_FromRest_BuildsDownhillVelocity()
     {
         BikeMovementModel m = MakeModel();
         // Uphill ahead: surface rises toward +Z, so its normal tilts back (-Z)
         // and facing +Z climbs.
         Vector3 n = UphillNormal(20f);
         Vector3 result = m.Step(Vector3.zero, Vector3.forward, n, 0f, 0.02f);
-        Assert.GreaterOrEqual(Vector3.Dot(result, Vector3.forward), 0f);
+        Assert.Less(Vector3.Dot(result, Vector3.forward), 0f,
+            "A stopped bike facing uphill should begin slipping back down the fall line.");
     }
 
     [Test]
@@ -161,6 +163,41 @@ public class BikeMovementModelTests
     }
 
     [Test]
+    public void SideSlope_WithGravity_BuildsLateralDownhillVelocity()
+    {
+        BikeMovementModel m = MakeModel();
+        m.drag = 0f;
+        m.lateralGrip = 0f;
+
+        float angle = 20f * Mathf.Deg2Rad;
+        Vector3 groundNormal = new Vector3(-Mathf.Sin(angle), Mathf.Cos(angle), 0f).normalized;
+
+        Vector3 result = m.Step(Vector3.zero, Vector3.forward, groundNormal, 0f, 0.02f);
+
+        Assert.Less(result.x, -0.001f,
+            "A side slope should create lateral downhill drift instead of constraining motion to bike forward.");
+        Assert.AreEqual(0f, Vector3.Dot(result, Vector3.forward), 0.001f,
+            "A pure side slope should not invent forward speed.");
+    }
+
+    [Test]
+    public void Flat_LateralVelocity_DampsTowardForwardTrack()
+    {
+        BikeMovementModel m = MakeModel();
+        m.drag = 0f;
+        m.gravity = 0f;
+        m.lateralGrip = 8f;
+
+        Vector3 velocity = (Vector3.forward * 3f) + (Vector3.right * 4f);
+
+        Vector3 result = m.Step(velocity, Vector3.forward, Vector3.up, 0f, 0.02f);
+
+        Assert.Less(Mathf.Abs(result.x), 4f,
+            "Lateral grip should bleed sideways slip without deleting forward motion.");
+        Assert.AreEqual(3f, Vector3.Dot(result, Vector3.forward), 0.001f);
+    }
+
+    [Test]
     public void SteepUphill_CapsUpwardLaunchVelocity()
     {
         BikeMovementModel m = MakeModel();
@@ -184,5 +221,23 @@ public class BikeMovementModelTests
         // facing parallel to the normal -> projected heading is ~zero.
         Vector3 result = m.Step(v, Vector3.up, Vector3.up, 1f, 0.02f);
         Assert.AreEqual(v, result);
+    }
+
+    [Test]
+    public void StepDetailed_ReturnsForwardAndLateralTelemetry()
+    {
+        BikeMovementModel m = MakeModel();
+        m.drag = 0f;
+        m.gravity = 0f;
+        m.lateralGrip = 0f;
+
+        Vector3 velocity = (Vector3.forward * 3f) + (Vector3.right * 4f);
+
+        BikeMovementResult result = m.StepDetailed(
+            velocity, Vector3.forward, Vector3.up, 0f, 0f, 0.02f);
+
+        Assert.AreEqual(3f, result.ForwardSpeed, 0.001f);
+        Assert.AreEqual(4f, result.LateralSpeed, 0.001f);
+        Assert.AreEqual(result.Velocity, m.Step(velocity, Vector3.forward, Vector3.up, 0f, 0f, 0.02f));
     }
 }
