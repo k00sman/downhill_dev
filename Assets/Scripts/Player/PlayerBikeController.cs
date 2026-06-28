@@ -181,12 +181,13 @@ namespace Downhill.Player
                 return; // airborne: Rigidbody gravity owns the arc
             }
 
-            Quaternion bikeRotation = ApplySteering(dt, groundNormal);
+            float frontBrakeInput = _input != null ? _input.FrontBrake : 0f;
+            float rearBrakeInput = _input != null ? _input.RearBrake : 0f;
+
+            Quaternion bikeRotation = ApplySteering(dt, groundNormal, frontBrakeInput);
             UpdateVisualTerrainPitch(groundNormal, bikeRotation, dt);
 
             float pedal01 = _pedalPowerMax > 0f ? PedalPower / _pedalPowerMax : 0f;
-            float frontBrakeInput = _input != null ? _input.FrontBrake : 0f;
-            float rearBrakeInput = _input != null ? _input.RearBrake : 0f;
             float brakeDecel = _brake != null ? _brake.GetTotalBrakeDecel(frontBrakeInput, rearBrakeInput) : 0f;
 
             BikeMovementResult movementResult = _movement.StepDetailed(
@@ -195,7 +196,7 @@ namespace Downhill.Player
             UpdateGroundMovementTelemetry(movementResult);
         }
 
-        private Quaternion ApplySteering(float dt, Vector3 groundNormal)
+        private Quaternion ApplySteering(float dt, Vector3 groundNormal, float frontBrakeInput)
         {
             Quaternion currentRotation = _body != null ? _body.rotation : transform.rotation;
             if (_steering == null)
@@ -205,7 +206,7 @@ namespace Downhill.Player
 
             float turn = _input != null ? _input.Turn : 0f;
             float yawDelta = _steering.StepYawDeltaDegrees(
-                currentRotation * Vector3.forward, _body.linearVelocity, turn, groundNormal, dt);
+                currentRotation * Vector3.forward, _body.linearVelocity, turn, groundNormal, dt, frontBrakeInput);
             if (Mathf.Approximately(yawDelta, 0f))
             {
                 return currentRotation;

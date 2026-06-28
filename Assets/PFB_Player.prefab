@@ -120,9 +120,9 @@ MonoBehaviour:
   _groundCheck: {fileID: 4961183217523439498}
   _recoveryAnchor: {fileID: 8220739475990105250}
   _movement:
-    maxSpeed: 13.6
-    slopeDriveGain: 0.34
-    pedalAccel: 6.4
+    maxSpeed: 10.88
+    slopeDriveGain: 0.272
+    pedalAccel: 2.56
     drag: 0.02
     lateralGrip: 6
     gravity: 9.81
@@ -139,6 +139,7 @@ MonoBehaviour:
     lowSpeedDownhillAlignmentYawRateDegreesPerSecond: 70
     downhillAlignmentMinSlopeDegrees: 5
     headingAlignmentDeadzoneDegrees: 3
+    frontBrakeAlignmentSuppressionThreshold: 0.1
   _brake:
     frontBrakePower: 12
     rearBrakePower: 8
@@ -152,11 +153,11 @@ MonoBehaviour:
   _maxVisualPitchDegrees: 55
   _pedalInput:
     cadenceWindowSeconds: 0.45
-    basePressDrive: 0.15
-    alternatingDriveBonus: 0.5
-    sameSideDrive: 0.03
+    basePressDrive: 0.06
+    alternatingDriveBonus: 0.2
+    sameSideDrive: 0.01
     useSinglePedalFallback: 0
-    fallbackDrive: 0.35
+    fallbackDrive: 0.14
   _pedalPowerMax: 1
   _pedalDecayPerSec: 0.8
 --- !u!114 &3816296678916602138

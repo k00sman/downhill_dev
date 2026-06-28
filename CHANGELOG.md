@@ -11,6 +11,33 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **Pedal-driven camera bob (Ticket 2.1)** — 2026-06-28
+  - Added a small first-person camera bob driven by pedal power, isolated in a
+    pure `CameraPedalBobModel` so the feel can be tuned independently of bike
+    physics.
+
+- **Sprint 10 consolidation + region model + gap-fill (docs)** — 2026-06-28
+  - Built out **Sprint 10 — Run End & Flow**: moved death & quick restart (from
+    Sprint 4) into **10.1 Death, restart & re-roll** (+ a brief death stinger), and
+    run completion/win (from Sprint 7) into **10.2 Run completion and win**;
+    renumbered the run-end stats screen to **10.3**. Sprint 4 dropped the
+    death/restart ticket (damage feedback renumbered 4.4→4.3); Sprint 5 monster
+    contact now only emits the death event and routes into Sprint 10.
+  - Reworked **Sprint 7** to the **two-region run model**: each run draws 5
+    non-repeating shuffled segments per region from difficulty-bucketed pools,
+    joined by a bridge segment, region 2 harder; Sprint 5 monster pressure now
+    escalates at region transitions.
+  - Applied remaining interview decisions: jump = short realistic **hop** off
+    terrain (no jump-pads, Ticket 3.1); crash recovery camera **detaches to the
+    fallen rider with freelook** (3.1→3.4); headlamp **flicker as health drops** +
+    markers as pure art material (6.1); added **6.2 on-screen control card**, **6.3
+    debug & playtest hotkeys**, **6.4 visual speed feedback (FOV + light shake)**.
+  - Rewrote stale exit criteria (Sprints 1, 4, 5, 6, 7, 10) per the exit-criteria
+    review; reconciled `docs/TICKETS.md` (Sprint 10 goal + roster moves) and the
+    `AGENTS.md` phase list (→ 11. Run end & flow).
+  - Note: the fall-line/terrain-steering fix is already implemented in code
+    (Option 3), so no separate foundation ticket was added.
+
 - **Alternating pedal cadence (Ticket 2.1)** — 2026-06-28
   - Added a pure `PedalInputEvaluator` with tunable cadence window, base drive,
     alternation bonus, same-side spam penalty, and single-pedal fallback.
@@ -222,6 +249,15 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Changed
 
+- **Bike speed and camera-bob tuning follow-up (Ticket 2.1)** — 2026-06-28
+  - Reduced downhill speed cap and slope drive by another 20%, reduced pedal
+    drive by 50%, and changed pedal bob to a slower camera lens-shift effect
+    instead of a world-position camera offset.
+
+- **Pedal power tuning follow-up (Ticket 2.1)** — 2026-06-28
+  - Reduced pedal acceleration and cadence-drive values so pedaling no longer
+    jumps from rest to near top speed as abruptly.
+
 - **Bike smoothing and downhill tuning pass** — 2026-06-28
   - Smoothed automatic turn-away-from-elevation steering, reduced that camber
     steering influence by 20%, and reduced downhill speed cap/slope drive by 15%.
@@ -240,6 +276,16 @@ versions yet. All entries currently live under [Unreleased].
     tuning.
 
 ### Fixed
+
+- **PlayMode movement test input isolation** — 2026-06-28
+  - Disabled Unity project-wide input actions in bike movement PlayMode tests so
+    unrelated default `Value` actions cannot schedule initial-state callbacks
+    under `InputTestFixture`.
+
+- **Front-brake heading pull** — 2026-06-28
+  - Suppressed automatic velocity/fall-line heading alignment while the front
+    brake is engaged, so front braking slows the bike without subtly steering it
+    toward the downhill center line.
 
 - **Generated input wrapper EditMode cleanup** — 2026-06-28
   - Updated generated-wrapper input asset tests to destroy the in-memory

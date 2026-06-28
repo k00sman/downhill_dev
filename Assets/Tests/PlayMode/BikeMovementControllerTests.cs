@@ -16,6 +16,14 @@ public class BikeMovementControllerTests : InputTestFixture
     public override void Setup()
     {
         base.Setup();
+        // Unity 6 enables project-wide input actions during PlayMode test setup.
+        // These physics tests drive the bike directly, so keep unrelated default
+        // Value actions from scheduling initial-state callbacks.
+        InputActionAsset projectWideActions = InputSystem.actions;
+        if (projectWideActions != null)
+        {
+            projectWideActions.Disable();
+        }
     }
 
     [TearDown]

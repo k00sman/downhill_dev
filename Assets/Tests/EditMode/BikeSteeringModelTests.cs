@@ -93,6 +93,25 @@ public class BikeSteeringModelTests
     }
 
     [Test]
+    public void StepYawDeltaDegrees_FrontBrake_SuppressesVelocityAlignmentYaw()
+    {
+        BikeSteeringModel model = MakeModel();
+        model.turnRateDegreesPerSecond = 0f;
+        model.slopeInfluence = 0f;
+
+        float unbrakedYaw = model.StepYawDeltaDegrees(
+            Vector3.forward, Vector3.right * 5f, 0f, Vector3.up, 0.02f, 0f);
+
+        float brakedYaw = model.StepYawDeltaDegrees(
+            Vector3.forward, Vector3.right * 5f, 0f, Vector3.up, 0.02f, 1f);
+
+        Assert.Greater(unbrakedYaw, 0f,
+            "Without braking, velocity alignment should yaw toward the travel direction.");
+        Assert.AreEqual(0f, brakedYaw, 0.0001f,
+            "Front braking should slow the bike without automatically pulling the heading toward velocity or fall line.");
+    }
+
+    [Test]
     public void StepYawDeltaDegrees_InsideDeadzone_ReturnsZero()
     {
         BikeSteeringModel model = MakeModel();

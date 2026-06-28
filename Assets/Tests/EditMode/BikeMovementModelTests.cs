@@ -9,9 +9,9 @@ public class BikeMovementModelTests
     {
         return new()
         {
-            maxSpeed = 13.6f,
-            slopeDriveGain = 0.34f,
-            pedalAccel = 6.4f,
+            maxSpeed = 10.88f,
+            slopeDriveGain = 0.272f,
+            pedalAccel = 2.56f,
             drag = 0.02f,
             gravity = 9.81f,
             lateralGrip = 6f,

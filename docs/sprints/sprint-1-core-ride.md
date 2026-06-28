@@ -211,13 +211,14 @@
 - The data is sufficient for rapid tuning — it is the only place the hidden health value is shown (it stays out of player-facing UI).
 
 **Notes:**
-- This is the live, on-screen counterpart to the run-end stats screen (Ticket 10.1): surface the same signals (speed, low-speed time, monster distance) in real time for tuning.
+- This is the live, on-screen counterpart to the run-end stats screen (Ticket 10.3): surface the same signals (speed, low-speed time, monster distance) in real time for tuning.
 
 ---
 
 ## Sprint exit criteria
 
 Sprint 1 is complete when:
-- The player can spawn on the trail, pedal forward, steer left and right, brake, and view the action through the first-person camera without null errors.
-- The debug HUD is readable and shows speed and grounded state.
+- The player can spawn on the trail, pedal forward, steer left and right, brake with separate front/rear brakes, and view the action through the first-person camera without null errors.
+- On banked or curved terrain the bike naturally carves toward lower ground without explicit steer input (fall-line drift), and the underlying grip / velocity model is tunable in the inspector.
+- The debug HUD shows speed, grounded state, and crash state and can be toggled on and off.
 - A playtester can ride the existing terrain segment end-to-end and answer: is simply riding the trail already interesting?

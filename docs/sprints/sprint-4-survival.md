@@ -63,36 +63,7 @@
 
 ---
 
-### Ticket 4.3 - Implement death and quick restart loop
-
-**Goal:** Make failed runs restart fast enough for repeated testing.
-
-**Dependencies:** Ticket 4.1.
-
-**Files:**
-- `PlayerDeathHandler`
-- `RunResetManager`
-
-**Research task for Opus:** Specify the fastest prototype restart flow that preserves iteration speed and avoids menu overhead.
-
-**Subagent tasks:**
-- Research subagent: define death flow, delays, and reset requirements.
-- Coding subagent A: implement death handling and input lockout.
-- Coding subagent B: implement level/player reset behavior.
-
-**Acceptance criteria:**
-- Death transitions the player into a fail state.
-- The run restarts quickly into an **instant ride** — the player spawns already in control on the trail, no menu/countdown (the monster's lag provides the natural head start).
-- Restart **re-rolls a new run** via the Sprint 7 `RunComposer` (fresh shuffled segment order); a debug seed can force a fixed run for tuning.
-- Core player systems (health, crash state, speed, damage-feedback effect) reset cleanly.
-
-**Notes:**
-- Re-roll-on-restart depends on Sprint 7. Until the loader exists, restart resets the single existing segment; wire the re-roll once `RunComposer` lands.
-- **Known deferred gap:** falling off the trail / out-of-bounds has no handling yet (decided out of scope for the prototype). The test trail is assumed bounded enough; revisit if playtests show players riding off edges.
-
----
-
-### Ticket 4.4 - Implement hidden-health damage feedback
+### Ticket 4.3 - Implement hidden-health damage feedback
 
 **Goal:** Let the player sense damage and danger without a health bar, since health is hidden.
 
@@ -123,6 +94,6 @@
 ## Sprint exit criteria
 
 Sprint 4 is complete when:
-- The player accumulates hidden health damage from crashes, senses it through screen desaturation + vignette, dies when health reaches zero, and restarts instantly into a freshly re-rolled run.
-- Damage values, regen delay, and feedback thresholds are tunable without code changes.
+- The player accumulates hidden health damage from crashes (scaled by impact severity and speed), senses it through screen desaturation and a light vignette, and dies when health reaches zero — emitting the death event handled by Sprint 10.
+- Health regeneration starts after 5 seconds without damage; damage values, regen delay, and feedback thresholds are all tunable without code changes.
 - A playtester can answer: does death feel fair given the visible risk taken?

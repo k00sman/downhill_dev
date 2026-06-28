@@ -133,7 +133,7 @@ package over third-party Unity-MCP bridges.
   `docs/superpowers/` so future agents can resume with context.
 - Specs go in `docs/superpowers/specs/`; plans go in `docs/superpowers/plans/`.
 - The roadmap lives in **`docs/TICKETS.md`** — the source of work. Phase order:
-  1. Input & player scaffolding → 2. Bicycle locomotion → 3. Turning, braking & camera → 4. Jumping & crash basics → 5. Health & fail states → 6. Monster chase stub → 7. Readability & instrumentation → 8. Segments & run composition → 9. Audio & atmosphere → 10. Surface & terrain handling.
+  1. Input & player scaffolding → 2. Bicycle locomotion → 3. Turning, braking & camera → 4. Jumping & crash basics → 5. Health & fail states → 6. Monster chase stub → 7. Readability & instrumentation → 8. Segments & run composition → 9. Audio & atmosphere → 10. Surface & terrain handling → 11. Run end & flow.
 - Sprint files live in `docs/sprints/` — one file per sprint, each containing its tickets in full. **When starting a sprint, read the sprint file.** When a sprint's exit criteria are met, mark it complete at the top of the sprint file.
 - **Definition of done** (per ticket): feature works in the existing level; touched files match planned scope; acceptance criteria met; debug output is enough to tune the feature; no unrelated systems introduced silently.
 - After completing every ticket, review `AGENTS.md` and append useful lessons
@@ -189,6 +189,16 @@ package over third-party Unity-MCP bridges.
 - **Smoothing code-owned yaw**: Raw terrain-normal slope steering can visibly jitter when normals change frame-to-frame. Smooth the automatic slope/camber steering contribution before applying yaw, and apply code-owned Rigidbody yaw with `MoveRotation` while feeding the predicted rotation into same-tick movement math. Avoid direct `transform.rotation` assignment in `FixedUpdate` when Rigidbody interpolation is expected to smooth the visible bike.
 - **Steering safety checks under extreme angles**: Governing steering availability based on the flat forward projection of velocity (`Vector3.Dot(velocity, flatForward)`) locks up steering when the bike faces uphill or turns sharply away from its sliding momentum. Use travel speed that includes sideways/backward motion (for current grounded steering, horizontal velocity magnitude) for steering minimum speed checks.
 - **Option 3 ground-plane bike movement**: `BikeMovementModel` intentionally allows downhill/backward/lateral slip from slope force and damps sideways motion with `lateralGrip`; `BikeSteeringModel` aligns heading toward horizontal velocity or the downhill fall line at near-stop. Do not reintroduce forward-only/no-side-slip tests as a default invariant. Future surface handling should layer onto `lateralGrip`, drag, max speed, and steering alignment rather than adding a parallel tire simulation.
+- **Brake-aware heading alignment**: Velocity/fall-line heading alignment helps
+  drift and uphill recovery, but active front braking should not implicitly
+  steer or "center" the bike. Pass front-brake state into the steering model and
+  suppress only automatic heading alignment while preserving manual steering and
+  slope/camber steering.
+- **Pedal camera feedback**: Keep pedal view bob as camera-only feedback, not
+  bike physics or bike-rig movement. Drive it from normalized/published pedal
+  power through a pure tunable model, and prefer applying it through the actual
+  `Camera` lens shift rather than offsetting a world transform parented under
+  the bike. Coasting downhill should not bob.
 - **Continuous ground contact on slopes**: On steep slope gradients or uphill climbs, the offset front ground probe sits higher. Ensure ground probe raycast distances are set deep enough (e.g., `1.2m` instead of `0.6m`) to prevent false "airborne" states that disable turning controls.
 - **URP Post-Processing & IMGUI conflicts**: Custom stylized blit passes (such as retro CRT/pixel-art shader scripts) can completely clear or obscure immediate-mode `OnGUI` graphics. For robust prototype HUDs, construct a `ScreenSpaceOverlay` Canvas with a high sorting order (`9999`) to guarantee UI is rendered on top of post-processing layers.
 - **External Configuration Files**: Expose player variables (like mouse/freelook `lookSensitivity`) in an external config file (e.g., `config.json` in the project root) that auto-creates itself with safe defaults on first launch. This allows testers to adjust handling without requiring Editor access.
@@ -207,6 +217,13 @@ package over third-party Unity-MCP bridges.
   calls `UnityEngine.Object.Destroy`, which logs EditMode errors. Destroy the
   generated in-memory asset with `UnityEngine.Object.DestroyImmediate` in a
   `finally` block instead.
+- **Project-wide Input System actions in PlayMode tests**: Unity 6 project-wide
+  actions (`InputSystem.actions`, configured in `EditorBuildSettings.asset`) are
+  enabled during PlayMode test setup and may include default `Value` actions
+  that schedule initial-state callbacks. Physics tests that inherit
+  `InputTestFixture` but do not exercise project-wide actions should disable
+  them in `Setup()` with an explicit Unity-object null check before spawning
+  gameplay prefabs.
 - **Tuning-only number changes**: Do not add new tests just to lock numeric
   tuning changes for existing behavior (for example bike speed, acceleration, or
   scalar feel tweaks). Update existing tests if their expectations need to follow

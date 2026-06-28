@@ -43,6 +43,13 @@
   bindings.
 
 **Notes:**
+- Follow-up tuning pass on 2026-06-28 further reduced downhill speed by 20%,
+  cut pedal drive by 50%, and moved pedal view bob to camera lens shift so it
+  reads as view feedback instead of making the bike rig appear to bounce.
+- Follow-up tuning pass on 2026-06-28 reduced pedal acceleration and cadence
+  drive by about 20%, added a small pedal-power camera bob, and made front brake
+  input suppress automatic velocity/fall-line heading alignment so braking
+  should slow the bike without subtly pulling it back toward the center line.
 - Implementation pass complete locally as of 2026-06-28; final ticket closure
   still needs Unity Test Runner results and an in-Editor playtest to confirm the
   cadence tuning feels intentional.

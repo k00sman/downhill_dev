@@ -33,6 +33,7 @@
 
 **Acceptance criteria:**
 - Jump only works when grounded, triggered by the `Jump` action (README: Space or the south face button).
+- The jump is a short, **realistic hop impulse** (not a big launch); players combine it with terrain lips/ramps to pull off effective jumps. Jumps are authored from **terrain geometry** — no placed jump-pads.
 - The bicycle can enter and leave an airborne state cleanly.
 - Basic landing detection works.
 - **No air control** — steering input is ignored while airborne, so takeoff commits the landing (reinforces reading the trail before committing).
@@ -140,8 +141,9 @@
 - Severe but non-fatal crashes interrupt normal riding (moderate-to-high-speed impacts throw the rider off the bike, per the README crash outcomes).
 - The player recovers **in place** via a **minimal QTE** (a simple timed/button-mash interaction) and remounts to return to control.
 - On crash, the bike comes to rest where the rider lands; a short recovery spline runs from the fallen bike back onto the rider. Completing the QTE returns the player to the bike, **repositioned/re-oriented so they are not pointed straight back at the obstacle they just hit**.
+- During the thrown / QTE / recovery window the camera **detaches to the rider's fallen position and keeps freelook**, so the player can glance back at the closing monster while recovering (reinforces "recovery lets the monster close in").
 - Recovery timing is long enough to matter for chase pressure — the delay is exactly what lets the monster close in.
-- Severity above the fatal threshold skips recovery and routes to instant death (handled in Sprint 4); this ticket owns only the recoverable path.
+- Severity above the fatal threshold skips recovery and emits the death event (run-end handled in **Sprint 10**); this ticket owns only the recoverable path.
 
 **Notes:**
 - Recovery is a **minimal QTE** by decision (README allows QTE or timed auto-recover; we commit to the QTE to test whether it adds tension). Keep the interaction isolated so it can be swapped for a timed auto-recover if it hurts pacing.

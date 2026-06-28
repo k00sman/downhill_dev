@@ -36,13 +36,13 @@ namespace Downhill.Player
     public class BikeMovementModel
     {
         [Tooltip("Horizontal grounded speed cap (m/s).")]
-        public float maxSpeed = 13.6f;
+        public float maxSpeed = 10.88f;
 
         [Tooltip("Multiplier on the gravity-along-slope drive.")]
-        public float slopeDriveGain = 0.34f;
+        public float slopeDriveGain = 0.272f;
 
         [Tooltip("Forward acceleration at full pedal power (m/s^2).")]
-        public float pedalAccel = 6.4f;
+        public float pedalAccel = 2.56f;
 
         [Tooltip("Linear drag coefficient (per second).")]
         public float drag = 0.02f;

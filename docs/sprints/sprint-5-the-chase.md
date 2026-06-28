@@ -60,6 +60,7 @@
 
 **Notes:**
 - Monster speed logic must be readable, not arbitrary — an open design risk (README): "the monster may feel unfair if its speed logic is not readable." Keep the lag and caps tunable and observable on the debug HUD.
+- **Region-based escalation:** pressure ramps with the run's region structure (Sprint 7). Region 2 raises the monster's acceleration/floor relative to region 1, so late-run tension builds at region transitions rather than via a generic timer. Expose the per-region escalation as tunable values; keep per-segment coupling out (region-level only).
 
 ---
 
@@ -71,7 +72,6 @@
 
 **Files:**
 - `MonsterChaseController`
-- `PlayerDeathHandler`
 - `PlayerHealth`
 
 **Research task for Opus:** Define the cleanest prototype contact rule for monster kills.
@@ -79,17 +79,18 @@
 **Subagent tasks:**
 - Research subagent: specify collision/contact detection and kill timing.
 - Coding subagent A: implement contact detection.
-- Coding subagent B: route contact into instant-death handling.
+- Coding subagent B: route contact into instant-death (health → 0) and emit the death event.
 
 **Acceptance criteria:**
-- Monster contact kills the player reliably — physical contact sets health to 0 immediately (README), routed through the same instant-death path as a fatal crash.
-- The same death/restart loop works for monster kills and crash deaths.
+- Monster contact kills the player reliably — physical contact sets health to 0 immediately (README) and emits the death event.
+- The death event routes into **Sprint 10's** run-end flow — the same path fatal crashes use. This ticket owns contact detection + instant-death emission only, **not** the restart/run-end.
 
 ---
 
 ## Sprint exit criteria
 
 Sprint 5 is complete when:
-- A monster spawns, tracks the player with lagged speed-following, and kills the player on contact using the same death/restart loop.
-- Slowing down or crashing causes the monster to visibly close the gap.
+- A monster spawns, tracks the player with lagged speed-following, and kills the player on contact by setting health to 0 and emitting the death event (the restart and run-end flow are Sprint 10's scope).
+- Slowing down or crashing causes the monster to visibly close the gap; pulling ahead opens it.
+- Monster speed, lag, floor, and cap are tunable and observable on the debug HUD.
 - A playtester can answer: does the monster create real pressure or does it feel ignorable?

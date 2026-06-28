@@ -70,6 +70,8 @@ classDiagram
     class BikeCameraController {
         +Quaternion FreelookRotation
         -PlayerInputReader _input
+        -PlayerBikeController _bike
+        -CameraPedalBobModel _pedalBob
     }
     class BikeMovementModel {
         +Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float dt)
@@ -101,6 +103,7 @@ classDiagram
     class BikeSteeringModel {
         +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, float dt)
         +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, Vector3 groundNormal, float dt)
+        +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, Vector3 groundNormal, float dt, float frontBrakeInput)
         +float turnRateDegreesPerSecond
         +float maxYawDeltaDegrees
         +float minSpeedForSteering
@@ -112,9 +115,17 @@ classDiagram
         +float lowSpeedDownhillAlignmentYawRateDegreesPerSecond
         +float downhillAlignmentMinSlopeDegrees
         +float headingAlignmentDeadzoneDegrees
+        +float frontBrakeAlignmentSuppressionThreshold
     }
     class CameraConfig {
         +float lookSensitivity
+    }
+    class CameraPedalBobModel {
+        +Vector2 StepLensShift(float pedalPower01, float dt)
+        +void Reset()
+        +float verticalLensShiftAmplitude
+        +float frequencyHz
+        +float activityResponse
     }
     class GameplayDebugHUD {
         -PlayerBikeController _player
@@ -206,6 +217,8 @@ classDiagram
     PlayerBikeController --> BikeBrakeModel : _brake
     PlayerBikeController --> PedalInputEvaluator : _pedalInput
     BikeCameraController --> PlayerInputReader : _input
+    BikeCameraController --> PlayerBikeController : _bike
+    BikeCameraController --> CameraPedalBobModel : _pedalBob
     GameplayDebugHUD --> PlayerBikeController : _player
     PedalInputEvaluator --> PedalSide : _lastSide
     EnvironmentScatterManager --> SplineZone : zones

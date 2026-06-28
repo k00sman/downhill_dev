@@ -5,11 +5,13 @@
 **Sprint status:** Not started
 
 > Covers the README's "Level structure" + "Segment schema" requirements and the
-> "Level loading and segment sequencing system" core system. The prototype scope
-> includes **1 region, 5 playable segments, and segment shuffling with no repeated
-> segment in a run** — this sprint builds all of it. Segment *art* (terrain,
-> props, marker placement) is Kam's level-design work; this sprint owns the
-> data/code that stitches segments together and composes a run.
+> "Level loading and segment sequencing system" core system. The prototype run is
+> **two difficulty-bucketed regions**: each region draws **5 non-repeating shuffled
+> segments** from its own pool, linked by a **bridge segment**, with next region
+> composed from higher-difficulty segments (and ramping monster pressure — Sprint
+> 5). Segment *art* (terrain, props, marker placement) is Kam's level-design work;
+> this sprint owns the data/code that stitches segments together and composes a run.
+> For now we only have 1 level from first region.
 
 ---
 
@@ -28,12 +30,12 @@
 **Subagent tasks:**
 - Research subagent: decide ScriptableObject-vs-component, define the field set and tag enums.
 - Coding subagent A: implement the `SegmentDefinition` data type with the README schema fields.
-- Coding subagent B: author placeholder definitions for the 5 prototype segments + intro/transition/ending.
+- Coding subagent B: author placeholder definitions across the two region pools + intro / bridge / ending.
 
 **Acceptance criteria:**
-- A segment record carries: region, segment ID, entry socket, exit socket, difficulty rating, expected speed band, hazard tags (jumps, hairpins, narrow trail, poor terrain, dense trees), visibility/readability tags, and primary route type (safe / fast / technical).
+- A segment record carries: **region bucket** (1 or 2), segment ID, entry socket, exit socket, difficulty rating, expected speed band, hazard tags (jumps, hairpins, narrow trail, poor terrain, dense trees), visibility/readability tags, and primary route type (safe / fast / technical).
 - Metadata is editable in the inspector without touching code.
-- The 5 prototype segments plus intro, region transition, and ending each have a definition.
+- Each region's segment pool plus the intro, bridge (region-to-region transition), and ending each have definitions; the prototype ships **two** region pools.
 
 **Notes:**
 - This is data scaffolding — no runtime stitching here. Keep it isolated in the `Downhill.Level` asmdef.
@@ -87,8 +89,8 @@
 - Coding subagent B: wire player spawn at the intro and verify an end-to-end multi-segment run loads without gaps.
 
 **Acceptance criteria:**
-- Given an ordered list (intro, N region segments, region transition, ending), the loader builds a connected, rideable run.
-- Region transition segments sit between regions; intro and ending bookend the run (matches the README `load_levels` example).
+- Given an ordered list (intro → region 1's 5 segments → bridge → region 2's 5 segments → ending), the loader builds a connected, rideable run.
+- The bridge segment sits between the two regions; intro and ending bookend the run (matches the README `load_levels` example).
 - The player spawns on the intro segment **already in control (instant ride, no menu/countdown)** and can ride through to the ending with no seams broken.
 
 **Notes:**
@@ -106,54 +108,30 @@
 - `RunComposer`
 - shuffle/selection tuning config
 
-**Research task for Opus:** Define the selection rule that picks and orders segments within a region so that no segment repeats in a single run, and decide whether every available segment must appear or a subset is chosen for shorter runs.
+**Research task for Opus:** Define the selection rule that, **per region**, draws 5 non-repeating shuffled segments from that region's pool (region 2 from the higher-difficulty pool), and orders the run as intro → region 1 → bridge → region 2 → ending.
 
 **Subagent tasks:**
-- Research subagent: specify the selection/ordering algorithm and its constraints.
-- Coding subagent A: implement `RunComposer` producing an ordered, non-repeating segment list per region.
+- Research subagent: specify the per-region selection/ordering algorithm and its constraints.
+- Coding subagent A: implement `RunComposer` producing, for each of the two regions, an ordered non-repeating list of 5 segments from that region's pool.
 - Coding subagent B: feed the composed order into `LevelSequenceLoader` and expose a seed for reproducible test runs.
 
 **Acceptance criteria:**
-- Each run produces an ordered segment list with **no segment repeated within the run** (README rule).
+- Each run produces an ordered list of **two regions × 5 non-repeating shuffled segments**, joined by the bridge and bookended by intro/ending — **no segment repeated within the run** (README rule).
+- Region 2's segments are drawn from the higher-difficulty pool, so the run escalates.
 - Re-running produces a different order (substantial variation between runs), and a fixed seed reproduces a given run for testing.
-- Composition respects region grouping and inserts intro / transition / ending around the shuffled segments.
 
 **Notes:**
 - Per README, the exact composition formula is not the point — ordered, non-repeating selection that creates variation is. Keep it simple and seedable.
-- The death/restart loop (Ticket 4.3) re-rolls a new composition on each restart by calling back into `RunComposer`.
-
----
-
-### Ticket 7.5 - Implement run completion and summary
-
-**Goal:** Give a run an explicit win condition — reaching the end — and close the loop back to a fresh run.
-
-**Dependencies:** Tickets 7.3, 5.2, and 10.1.
-
-**Files:**
-- `RunCompletionHandler`
-- run-summary readout (reuses the metrics from Ticket 10.1)
-
-**Research task for Opus:** Specify how reaching the ending segment finishes the run: stop the monster, freeze fail conditions, present a short run summary, and route into a fresh re-rolled run.
-
-**Subagent tasks:**
-- Research subagent: define the completion trigger, monster/fail shutdown, and summary contents.
-- Coding subagent A: implement the ending-reached trigger and win state.
-- Coding subagent B: present the run summary and wire restart into a re-rolled run.
-
-**Acceptance criteria:**
-- Reaching the ending segment ends the run as a **win** (README gameplay-loop step 5: "reach the end of the run").
-- On completion the monster stops pursuing and crash/death can no longer trigger.
-- A short run summary appears (duration, average speed, crashes, cause-of-death N/A on a win, monster-distance trend) using the Ticket 10.1 metrics, then the player can start a fresh re-rolled run.
-
-**Notes:**
-- This is the only success/end state in the prototype — failure paths (crash/monster death) are covered in Sprints 3–5. Keep the summary lightweight and fast to dismiss (the README wants rapid repeated runs).
+- The death/restart loop (Ticket 10.1) re-rolls a new composition on each restart by calling back into `RunComposer`.
 
 ---
 
 ## Sprint exit criteria
 
 Sprint 7 is complete when:
-- The 5 prototype segments carry queryable metadata, connect via sockets into one continuous downhill run, and the run is composed by a no-repeat shuffle that varies between plays (and is seed-reproducible for testing).
-- Reaching the ending segment wins the run, shows a short summary, and leads into a fresh re-rolled run; a fixed ordered list can still be loaded for debugging.
-- A playtester can answer: do modular segments connect cleanly enough to support replayability?
+- Prototype segments carry queryable metadata (region bucket, difficulty rating, hazard tags, route type) and connect via sockets into one continuous downhill run without visible seams or steps.
+- Each run is composed of two difficulty-bucketed regions: each region draws 5 non-repeating shuffled segments from its pool, linked by a bridge segment; region 2 is composed from higher-difficulty segments.
+- The no-repeat shuffle varies between plays and is seed-reproducible for testing; a fixed ordered list can still be loaded for debugging.
+- A playtester can answer: do modular segments connect cleanly and does the two-region structure produce a run that feels varied and escalating in difficulty?
+
+> Win state, run summary, and re-roll on completion are **Sprint 10's** scope (the loader here only emits the "ending reached" signal Sprint 10 consumes).

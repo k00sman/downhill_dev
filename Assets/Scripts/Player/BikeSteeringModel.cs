@@ -41,6 +41,9 @@ namespace Downhill.Player
         [Tooltip("Heading alignment error below this angle is ignored.")]
         public float headingAlignmentDeadzoneDegrees = 3f;
 
+        [Tooltip("Front brake input at or above this value suppresses automatic heading alignment.")]
+        public float frontBrakeAlignmentSuppressionThreshold = 0.1f;
+
         private float _smoothedSlopeSteer;
 
         public float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, float dt)
@@ -49,6 +52,12 @@ namespace Downhill.Player
         }
 
         public float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, Vector3 groundNormal, float dt)
+        {
+            return StepYawDeltaDegrees(currentForward, velocity, turnInput, groundNormal, dt, 0f);
+        }
+
+        public float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput,
+                                         Vector3 groundNormal, float dt, float frontBrakeInput)
         {
             Vector3 flatForward = Vector3.ProjectOnPlane(currentForward, Vector3.up);
             if (flatForward.sqrMagnitude < 1e-6f)
@@ -77,12 +86,21 @@ namespace Downhill.Player
             float targetSlopeSteer = canSteerNormally ? slopeRoll * slopeInfluence : 0f;
             float slopeSteer = SmoothSlopeSteer(targetSlopeSteer, dt);
             float playerSteer = canSteerNormally ? input * Mathf.Max(0f, turnRateDegreesPerSecond) : 0f;
-            float alignmentYaw = HeadingAlignmentYaw(flatForward, velocity, input, groundNormal, dt);
+            float alignmentYaw = ShouldSuppressHeadingAlignment(frontBrakeInput)
+                ? 0f
+                : HeadingAlignmentYaw(flatForward, velocity, input, groundNormal, dt);
 
             float unclampedYaw = ((playerSteer + slopeSteer) * dt) + alignmentYaw;
 
             float maxDelta = Mathf.Max(0f, maxYawDeltaDegrees);
             return Mathf.Clamp(unclampedYaw, -maxDelta, maxDelta);
+        }
+
+        private bool ShouldSuppressHeadingAlignment(float frontBrakeInput)
+        {
+            float brakeInput = Mathf.Clamp01(frontBrakeInput);
+            float threshold = Mathf.Max(0f, frontBrakeAlignmentSuppressionThreshold);
+            return threshold <= 0f ? brakeInput > 0f : brakeInput >= threshold;
         }
 
         private float SmoothSlopeSteer(float targetSlopeSteer, float dt)

@@ -16,7 +16,7 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 | Sprint 7 — Segments & Run Composition | [`docs/sprints/sprint-7-segments.md`](sprints/sprint-7-segments.md) | Do modular segments connect cleanly into replayable runs? | Not started |
 | Sprint 8 — Audio & Atmosphere | [`docs/sprints/sprint-8-audio.md`](sprints/sprint-8-audio.md) | Does audio sell speed, danger, and dread? | Not started |
 | Sprint 9 — Surface & Terrain Handling | [`docs/sprints/sprint-9-surface.md`](sprints/sprint-9-surface.md) | Does the trail surface change how the bike handles? | Not started |
-| Sprint 10 — Run End & Flow | [`docs/sprints/sprint-10-run-end.md`](sprints/sprint-10-run-end.md) | Does a run end cleanly and tell the player how they did? | Not started |
+| Sprint 10 — Run End & Flow | [`docs/sprints/sprint-10-run-end.md`](sprints/sprint-10-run-end.md) | Does the run feel conclusive — win or loss — and get you back on the trail fast enough to want another try? | Not started |
 
 > **Sprint 0** is a meta/tooling sprint (agent workflow), not part of the gameplay
 > phase order below. Its tickets live in its own file and are not duplicated in the
@@ -85,8 +85,7 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 |--------|-------|--------|
 | 4.1 | Implement hidden player health system | Not started |
 | 4.2 | Hook collision damage into health | Not started |
-| 4.3 | Implement death and quick restart loop | Not started |
-| 4.4 | Implement hidden-health damage feedback | Not started |
+| 4.3 | Implement hidden-health damage feedback | Not started |
 
 ### Sprint 5 — The Chase
 
@@ -101,6 +100,9 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 | Ticket | Title | Status |
 |--------|-------|--------|
 | 6.1 | Implement headlamp gameplay light | Not started |
+| 6.2 | On-screen control card | Not started |
+| 6.3 | Debug & playtest hotkeys | Not started |
+| 6.4 | Visual speed feedback | Not started |
 
 ### Sprint 7 — Segments & Run Composition
 
@@ -110,7 +112,6 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 | 7.2 | Implement segment socket connection | Not started |
 | 7.3 | Implement level loading and sequencing system | Not started |
 | 7.4 | Implement no-repeat run shuffle | Not started |
-| 7.5 | Implement run completion and summary | Not started |
 
 ### Sprint 8 — Audio & Atmosphere
 
@@ -139,7 +140,9 @@ Full ticket details (goal, acceptance criteria, subagent tasks) live in the spri
 
 | Ticket | Title | Status |
 |--------|-------|--------|
-| 10.1 | Run-end statistics screen | Not started |
+| 10.1 | Death, restart & re-roll | Not started |
+| 10.2 | Run completion and win | Not started |
+| 10.3 | Run-end statistics screen | Not started |
 
 ## Working rules
 

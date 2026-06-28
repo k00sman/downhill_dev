@@ -10,6 +10,8 @@ namespace Downhill.Player
         [Header("References")]
         [SerializeField] private Transform _targetPivot;
         [SerializeField] private PlayerInputReader _input;
+        [SerializeField] private PlayerBikeController _bike;
+        [SerializeField] private Camera _viewCamera;
 
         [Header("Follow Settings")]
         [SerializeField] private float _positionLerpSpeed = 30f;
@@ -22,8 +24,12 @@ namespace Downhill.Player
         [SerializeField] private float _minYaw = -90f;
         [SerializeField] private float _maxYaw = 90f;
 
+        [Header("Pedal Bob")]
+        [SerializeField] private CameraPedalBobModel _pedalBob = new();
+
         private float _freelookYaw;
         private float _freelookPitch;
+        private Vector2 _baseLensShift;
 
         [System.Serializable]
         private class CameraConfig
@@ -37,7 +43,22 @@ namespace Downhill.Player
         {
             LoadConfig();
 
-            if (_targetPivot == null || _input == null)
+            if (_pedalBob == null)
+            {
+                _pedalBob = new CameraPedalBobModel();
+            }
+
+            if (_viewCamera == null)
+            {
+                _viewCamera = GetComponentInChildren<Camera>();
+            }
+
+            if (_viewCamera != null)
+            {
+                _baseLensShift = _viewCamera.lensShift;
+            }
+
+            if (_targetPivot == null || _input == null || _bike == null)
             {
                 PlayerBikeController controller = FindFirstObjectByType<PlayerBikeController>();
                 if (controller != null)
@@ -51,12 +72,26 @@ namespace Downhill.Player
                     {
                         _input = controller.Input;
                     }
+
+                    if (_bike == null)
+                    {
+                        _bike = controller;
+                    }
                 }
             }
 
             // Lock and hide cursor for a proper gameplay feel
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+        }
+
+        private void OnDisable()
+        {
+            _pedalBob?.Reset();
+            if (_viewCamera != null)
+            {
+                _viewCamera.lensShift = _baseLensShift;
+            }
         }
 
         private void LoadConfig()
@@ -95,8 +130,8 @@ namespace Downhill.Player
                 return;
             }
 
-            // Position follow (smoothly interpolate to target pivot position)
             transform.position = Vector3.Lerp(transform.position, _targetPivot.position, _positionLerpSpeed * Time.deltaTime);
+            ApplyPedalBob();
 
             // Handle freelook input
             Vector2 lookInput = _input != null ? _input.Freelook : Vector2.zero;
@@ -116,6 +151,16 @@ namespace Downhill.Player
             Quaternion targetRotation = baseRotation * FreelookRotation;
 
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationLerpSpeed * Time.deltaTime);
+        }
+
+        private void ApplyPedalBob()
+        {
+            if (_viewCamera == null || _pedalBob == null || _bike == null)
+            {
+                return;
+            }
+
+            _viewCamera.lensShift = _baseLensShift + _pedalBob.StepLensShift(_bike.PedalPower, Time.deltaTime);
         }
     }
 }
