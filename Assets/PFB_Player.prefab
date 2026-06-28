@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4850355210995392898}
   - component: {fileID: 3369517479631482297}
   - component: {fileID: 4083079753745822618}
+  - component: {fileID: 3816296678916602138}
   m_Layer: 0
   m_Name: PFB_Player
   m_TagString: Player
@@ -119,23 +120,52 @@ MonoBehaviour:
   _groundCheck: {fileID: 4961183217523439498}
   _recoveryAnchor: {fileID: 8220739475990105250}
   _movement:
-    maxSpeed: 20
-    slopeDriveGain: 0.5
-    pedalAccel: 8
+    maxSpeed: 16
+    slopeDriveGain: 0.4
+    pedalAccel: 6.4
     drag: 0.02
     gravity: 9.81
     maxGroundedUpSpeed: 0.75
+  _steering:
+    turnRateDegreesPerSecond: 100
+    maxYawDeltaDegrees: 8
+    minSpeedForSteering: 0.5
+    turnDeadzone: 0.15
+    slopeInfluence: 30
+  _brake:
+    frontBrakePower: 12
+    rearBrakePower: 8
   _groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  _groundProbeDistance: 0.6
+  _groundProbeDistance: 1.2
   _groundProbeForwardOffset: 0.75
   _groundProbeRearOffset: 0.75
   _terrainPitchLerp: 12
   _maxVisualPitchDegrees: 55
-  _pedalImpulse: 0.5
+  _pedalInput:
+    cadenceWindowSeconds: 0.45
+    basePressDrive: 0.15
+    alternatingDriveBonus: 0.5
+    sameSideDrive: 0.03
+    useSinglePedalFallback: 0
+    fallbackDrive: 0.35
   _pedalPowerMax: 1
   _pedalDecayPerSec: 0.8
+--- !u!114 &3816296678916602138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511561621724766687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47dff9f6b55d487a4804fd7dd65bb072, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Downhill.Player::Downhill.Player.GameplayDebugHUD
+  _showHUD: 1
+  _toggleKey: 284
 --- !u!1 &4789164619254481586
 GameObject:
   m_ObjectHideFlags: 0

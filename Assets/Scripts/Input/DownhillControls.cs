@@ -162,7 +162,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000001-0000-4000-8000-000000000001"",
-                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -173,7 +173,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000002-0000-4000-8000-000000000002"",
-                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -184,7 +184,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000003-0000-4000-8000-000000000003"",
-                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -195,7 +195,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000004-0000-4000-8000-000000000004"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -206,7 +206,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000005-0000-4000-8000-000000000005"",
-                    ""path"": ""<Mouse>/rightButton"",
+                    ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -217,7 +217,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000006-0000-4000-8000-000000000006"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -228,7 +228,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000007-0000-4000-8000-000000000007"",
-                    ""path"": ""<Keyboard>/leftShift"",
+                    ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -239,7 +239,7 @@ namespace Downhill.Input
                 {
                     ""name"": """",
                     ""id"": ""b0000008-0000-4000-8000-000000000008"",
-                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",

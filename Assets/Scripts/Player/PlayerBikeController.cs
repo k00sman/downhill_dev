@@ -11,9 +11,8 @@ namespace Downhill.Player
     }
 
     /// Player bicycle actor. Holds wiring/validation (Ticket 1.2) and the
-    /// downhill forward-movement loop (Ticket 2.1): a grounded raycast feeds a
-    /// pure BikeMovementModel that drives Rigidbody velocity. No steering,
-    /// braking, or cadence rule yet (Tickets 2.2 / 3.x).
+    /// downhill forward-movement loop: a grounded raycast feeds pure movement
+    /// and cadence models that drive Rigidbody velocity.
     [RequireComponent(typeof(Rigidbody), typeof(PlayerInputReader))]
     public class PlayerBikeController : MonoBehaviour
     {
@@ -31,9 +30,12 @@ namespace Downhill.Player
         [Header("Steering (Ticket 3.1)")]
         [SerializeField] private BikeSteeringModel _steering = new();
 
+        [Header("Braking (Ticket 1.5)")]
+        [SerializeField] private BikeBrakeModel _brake = new();
+
         [Header("Ground probe")]
         [SerializeField] private LayerMask _groundMask = ~0;
-        [SerializeField] private float _groundProbeDistance = 0.6f;
+        [SerializeField] private float _groundProbeDistance = 1.2f;
         [SerializeField] private float _groundProbeForwardOffset = 0.75f;
         [SerializeField] private float _groundProbeRearOffset = 0.75f;
 
@@ -42,11 +44,9 @@ namespace Downhill.Player
         [SerializeField] private float _maxVisualPitchDegrees = 55f;
 
         [Header("Pedal drive")]
-        [SerializeField] private float _pedalImpulse = 0.5f;
+        [SerializeField] private PedalInputEvaluator _pedalInput = new();
         [SerializeField] private float _pedalPowerMax = 1f;
         [SerializeField] private float _pedalDecayPerSec = 0.8f;
-
-        private float _pedalPower;
 
         public Rigidbody Body => _body;
         public PlayerInputReader Input => _input;
@@ -57,6 +57,8 @@ namespace Downhill.Player
 
         public BikeState State { get; private set; } = BikeState.Riding;
         public bool IsGrounded { get; private set; }
+        public float PedalPower { get; private set; }
+        public Vector3 GroundNormal { get; private set; } = Vector3.up;
 
         private void OnValidate()
         {
@@ -112,8 +114,8 @@ namespace Downhill.Player
                 return;
             }
 
-            _input.PedalLeftPressed += OnPedalPressed;
-            _input.PedalRightPressed += OnPedalPressed;
+            _input.PedalLeftPressed += OnPedalLeftPressed;
+            _input.PedalRightPressed += OnPedalRightPressed;
         }
 
         private void OnDisable()
@@ -123,20 +125,36 @@ namespace Downhill.Player
                 return;
             }
 
-            _input.PedalLeftPressed -= OnPedalPressed;
-            _input.PedalRightPressed -= OnPedalPressed;
+            _input.PedalLeftPressed -= OnPedalLeftPressed;
+            _input.PedalRightPressed -= OnPedalRightPressed;
+            _pedalInput?.Reset();
         }
 
-        private void OnPedalPressed()
+        private void OnPedalLeftPressed()
         {
-            AddPedalPower(_pedalImpulse);
+            AddCadencePedalPower(PedalSide.Left);
+        }
+
+        private void OnPedalRightPressed()
+        {
+            AddCadencePedalPower(PedalSide.Right);
+        }
+
+        private void AddCadencePedalPower(PedalSide side)
+        {
+            if (_pedalInput == null)
+            {
+                return;
+            }
+
+            AddPedalPower(_pedalInput.EvaluatePress(side, Time.time));
         }
 
         /// Adds pedal power (clamped). Public so PlayMode tests and later
         /// tickets can drive the accumulator without synthesizing input events.
         public void AddPedalPower(float amount)
         {
-            _pedalPower = Mathf.Min(_pedalPower + amount, _pedalPowerMax);
+            PedalPower = Mathf.Min(PedalPower + amount, _pedalPowerMax);
         }
 
         private void FixedUpdate()
@@ -147,9 +165,10 @@ namespace Downhill.Player
             }
 
             float dt = Time.fixedDeltaTime;
-            _pedalPower = Mathf.MoveTowards(_pedalPower, 0f, _pedalDecayPerSec * dt);
+            PedalPower = Mathf.MoveTowards(PedalPower, 0f, _pedalDecayPerSec * dt);
 
             IsGrounded = TryProbeGround(out _, out Vector3 groundNormal);
+            GroundNormal = IsGrounded ? groundNormal : Vector3.up;
 
             if (!IsGrounded)
             {
@@ -157,15 +176,19 @@ namespace Downhill.Player
                 return; // airborne: Rigidbody gravity owns the arc
             }
 
-            ApplySteering(dt);
+            ApplySteering(dt, groundNormal);
             UpdateVisualTerrainPitch(groundNormal, dt);
 
-            float pedal01 = _pedalPowerMax > 0f ? _pedalPower / _pedalPowerMax : 0f;
+            float pedal01 = _pedalPowerMax > 0f ? PedalPower / _pedalPowerMax : 0f;
+            float frontBrakeInput = _input != null ? _input.FrontBrake : 0f;
+            float rearBrakeInput = _input != null ? _input.RearBrake : 0f;
+            float brakeDecel = _brake != null ? _brake.GetTotalBrakeDecel(frontBrakeInput, rearBrakeInput) : 0f;
+
             _body.linearVelocity = _movement.Step(
-                _body.linearVelocity, transform.forward, groundNormal, pedal01, dt);
+                _body.linearVelocity, transform.forward, groundNormal, pedal01, brakeDecel, dt);
         }
 
-        private void ApplySteering(float dt)
+        private void ApplySteering(float dt, Vector3 groundNormal)
         {
             if (_steering == null)
             {
@@ -174,7 +197,7 @@ namespace Downhill.Player
 
             float turn = _input != null ? _input.Turn : 0f;
             float yawDelta = _steering.StepYawDeltaDegrees(
-                transform.forward, _body.linearVelocity, turn, dt);
+                transform.forward, _body.linearVelocity, turn, groundNormal, dt);
             if (Mathf.Approximately(yawDelta, 0f))
             {
                 return;

@@ -1,7 +1,10 @@
 {
     "name": "Downhill.Player",
     "rootNamespace": "Downhill.Player",
-    "references": ["Downhill.Input"],
+    "references": [
+        "Downhill.Input",
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

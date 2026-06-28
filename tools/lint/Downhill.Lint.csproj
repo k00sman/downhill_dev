@@ -39,6 +39,11 @@
          source here (otherwise every gameplay type is defined twice -> CS0436). -->
     <_LintRef Include="../../Library/ScriptAssemblies/*.dll"
               Exclude="../../Library/ScriptAssemblies/Downhill.Input.dll;../../Library/ScriptAssemblies/Downhill.Player.dll;../../Library/ScriptAssemblies/Downhill.Tests.EditMode.dll;../../Library/ScriptAssemblies/Downhill.Tests.PlayMode.dll;../../Library/ScriptAssemblies/Assembly-CSharp.dll;../../Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" />
+    <!-- Unity AI/MCP editor tooling is optional for this repo and pulls conflicting
+         System.Net.Http versions into the lint-only build. Gameplay code does not
+         depend on these assemblies, so keep them out of the analyzer reference set. -->
+    <_LintRef Remove="../../Library/ScriptAssemblies/HFDownloader.dll" />
+    <_LintRef Remove="../../Library/ScriptAssemblies/Unity.AI*.dll" />
     <_LintRef Include="../../Library/PackageCache/com.unity.ext.nunit*/**/nunit.framework.dll" />
     <Reference Include="@(_LintRef)">
       <Private>false</Private>

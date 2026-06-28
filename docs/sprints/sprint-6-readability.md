@@ -6,7 +6,7 @@
 
 ---
 
-### Ticket 7.1 - Implement headlamp gameplay light
+### Ticket 6.1 - Implement headlamp gameplay light
 
 **Goal:** Improve trail readability and support the night-horror tone.
 
@@ -25,32 +25,12 @@
 
 **Acceptance criteria:**
 - The headlamp illuminates the trail ahead.
-- The light follows the player's view or bike-facing direction according to the chosen spec.
-- Reflective trail markers are visually useful when present.
+- The light follows the player's **view / freelook direction** (decision: lamp tracks where the player looks, so they can illuminate around corners and toward hazards — accept that freelook can briefly darken the straight-ahead trail).
+- Reflective trail markers and tape catch the headlamp and are visually useful at night, helping guide navigation (README).
 
----
-
-### Ticket 7.3 - Add run metrics logging
-
-**Goal:** Capture enough data to tell whether the prototype is fun or just functional.
-
-**Dependencies:** Tickets 5.3 and 6.3.
-
-**Files:**
-- `PrototypeRunMetrics`
-- optional log exporter or console reporter
-
-**Research task for Opus:** Define the minimum set of run-level metrics needed to judge pace, difficulty, and control friction in early playtests.
-
-**Subagent tasks:**
-- Research subagent: specify tracked metrics and reset rules.
-- Coding subagent A: implement per-run data collection.
-- Coding subagent B: implement summary output on death or run end.
-
-**Acceptance criteria:**
-- Each run records duration, crashes, cause of death, average speed, and monster catch events.
-- Metrics reset correctly on restart.
-- Designers can read the summary without digging through engine internals.
+**Notes:**
+- Marker/tape **placement** is level-design/art (Kam); this ticket owns the light that makes them catch. Coordinate so the light's intensity/range actually lights placed markers.
+- Don't prioritize atmosphere over readability — an open design risk (README): "dark visuals may hurt trail readability if atmosphere is prioritized too aggressively."
 
 ---
 
@@ -58,5 +38,4 @@
 
 Sprint 6 is complete when:
 - The headlamp illuminates the trail and reflective markers are useful at night.
-- Per-run metrics (duration, crashes, cause of death, average speed, monster catch events) are logged and reset on restart.
 - A playtester can answer: can we tune the prototype from what we can see and read?

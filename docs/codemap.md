@@ -62,8 +62,18 @@ classDiagram
     }
 
     %% namespace: Downhill.Player
+    class BikeBrakeModel {
+        +float GetTotalBrakeDecel(float frontInput, float rearInput)
+        +float frontBrakePower
+        +float rearBrakePower
+    }
+    class BikeCameraController {
+        +Quaternion FreelookRotation
+        -PlayerInputReader _input
+    }
     class BikeMovementModel {
         +Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float dt)
+        +Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal, float pedalPower01, float brakeDecel, float dt)
         +float maxSpeed
         +float slopeDriveGain
         +float pedalAccel
@@ -79,10 +89,34 @@ classDiagram
     }
     class BikeSteeringModel {
         +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, float dt)
+        +float StepYawDeltaDegrees(Vector3 currentForward, Vector3 velocity, float turnInput, Vector3 groundNormal, float dt)
         +float turnRateDegreesPerSecond
         +float maxYawDeltaDegrees
         +float minSpeedForSteering
         +float turnDeadzone
+        +float slopeInfluence
+    }
+    class CameraConfig {
+        +float lookSensitivity
+    }
+    class GameplayDebugHUD {
+        -PlayerBikeController _player
+    }
+    class PedalInputEvaluator {
+        +float EvaluatePress(PedalSide side, float timeSeconds)
+        +void Reset()
+        +float cadenceWindowSeconds
+        +float basePressDrive
+        +float alternatingDriveBonus
+        +float sameSideDrive
+        +bool useSinglePedalFallback
+        +float fallbackDrive
+        -PedalSide _lastSide
+    }
+    class PedalSide {
+        <<enumeration>>
+        Left
+        Right
     }
     class PlayerBikeController {
         +Rigidbody Body
@@ -93,10 +127,14 @@ classDiagram
         +Transform RecoveryAnchor
         +BikeState State
         +bool IsGrounded
+        +float PedalPower
+        +Vector3 GroundNormal
         +void AddPedalPower(float amount)
         -PlayerInputReader _input
         -BikeMovementModel _movement
         -BikeSteeringModel _steering
+        -BikeBrakeModel _brake
+        -PedalInputEvaluator _pedalInput
     }
 
     %% namespace: EnvironmentScatter
@@ -144,6 +182,11 @@ classDiagram
     PlayerBikeController --> PlayerInputReader : _input
     PlayerBikeController --> BikeMovementModel : _movement
     PlayerBikeController --> BikeSteeringModel : _steering
+    PlayerBikeController --> BikeBrakeModel : _brake
+    PlayerBikeController --> PedalInputEvaluator : _pedalInput
+    BikeCameraController --> PlayerInputReader : _input
+    GameplayDebugHUD --> PlayerBikeController : _player
+    PedalInputEvaluator --> PedalSide : _lastSide
     EnvironmentScatterManager --> SplineZone : zones
     SplineZone --> ZoneType : zoneType
     SplineZone --> WeightedPrefab : assets

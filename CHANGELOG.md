@@ -11,6 +11,65 @@ versions yet. All entries currently live under [Unreleased].
 
 ### Added
 
+- **Alternating pedal cadence (Ticket 2.1)** — 2026-06-28
+  - Added a pure `PedalInputEvaluator` with tunable cadence window, base drive,
+    alternation bonus, same-side spam penalty, and single-pedal fallback.
+  - Wired `PlayerBikeController` to feed side-aware pedal cadence into the
+    existing pedal-power accumulator instead of giving every pedal edge the same
+    impulse.
+  - Normalized shipped pedal bindings to LMB/RMB and LT/RT, keeping brakes on
+    W/S and LB/RB, with asset and generated-wrapper tests covering the mapping.
+
+- **Bike-handling research recommendations applied to sprint docs** — 2026-06-28
+  - Marked Sprint 1 status consistently complete in the sprint/index docs.
+  - Added Sprint 2 guidance to normalize pedal inputs to LMB/RMB, isolate
+    cadence in a pure evaluator, and keep speed-sensitive steering as a tunable
+    authored model rather than a full bike simulation rewrite.
+  - Added Sprint 3/Sprint 9 Unity physics guidance for explicit grounding,
+    movement ownership, standard crash events, deterministic wobble, front-brake
+    risk routing, and surface modifiers layered onto existing handling models.
+
+- **Sprint 1 Complete (Tickets 1.4 - 1.7)** — 2026-06-28
+  - Added split braking math (`BikeBrakeModel`) with configurable front and rear deceleration forces.
+  - Added first-person camera controller (`BikeCameraController`) with smooth transform follow and freelook.
+  - Added dynamic configuration file loading (`config.json`) at the project root for adjusting mouse look sensitivity externally.
+  - Added a Canvas-based overlay debug HUD (`GameplayDebugHUD`) displaying live speed, state, ground normal vector, pedal power, turn direction, and split brakes status on top of custom shaders.
+  - Added auto-wiring support to player and camera scripts for quick scene setup.
+
+- **Sprint ticket enrichment + two new sprints** — 2026-06-27
+  - Enriched existing sprint tickets with README specifics: hidden-health rules
+    (full start, 5s regen delay, monster-contact instant death), monster framing
+    (no pathfinding/float, lagged speed-follow, min/max caps), the full run-metric
+    set, headlamp aim (view/freelook), control-map bindings, and the minimal-QTE
+    crash recovery decision.
+  - Added **Sprint 3** tickets 3.5 (death wobble at excess speed) and 4.5
+    (front-brake-throw at high speed), promoting two deferred README handling goals.
+  - Added **Sprint 7 — Segments & Run Composition** (`docs/sprints/sprint-7-segments.md`):
+    segment schema/metadata, socket connection, level sequencing loader, and
+    no-repeat run shuffle.
+  - Added **Sprint 8 — Audio & Atmosphere** (`docs/sprints/sprint-8-audio.md`):
+    Unity-native audio foundation, speed/wind, surface/impact, monster cues, and
+    tension music hooks.
+  - Reconciled `docs/TICKETS.md` (sprint index, phase order 8–9, roster) and the
+    `AGENTS.md` phase list to include the new sprints.
+
+- **Creative gap-fill pass across sprints** — 2026-06-27
+  - Resolved the camera to **first-person** (T3.4 + Sprint 1 exit criteria + roster).
+  - Added Sprint 4 ticket 5.4 (hidden-health damage feedback: screen
+    desaturation/grayscale + light vignette), and set restart to **instant ride +
+    re-rolled run**; noted out-of-bounds as a deferred known gap.
+  - Added Sprint 7 ticket 8.5 (run completion + summary = the win state).
+  - Added **Sprint 9 — Surface & Terrain Handling** (`docs/sprints/sprint-9-surface.md`,
+    tickets 10.1–10.3): surface type system, surface-driven handling, surface
+    feedback hooks.
+  - Locked in: **no air control** on jumps (T4.1); pedal **timing-only**, pressure
+    ignored (T2.2); monster **visible behind the player** with tunable spawn
+    distance (T6.1); crash **recover-in-place QTE** with a fallen-bike→rider spline
+    that re-orients away from the just-hit obstacle (T4.4); fog/draw-distance
+    readability deferred.
+  - Updated `docs/TICKETS.md` (Sprint 9 index, phase 10, tickets 5.4/8.5/10.x) and
+    the `AGENTS.md` phase list (→ 10. Surface & terrain handling).
+
 - **Steering input pipeline (Ticket 3.1)** — 2026-06-25
   - Added a pure `BikeSteeringModel` for bounded, tunable yaw steering with
     terrain camber self-turning away from raised elevation.
@@ -154,7 +213,39 @@ versions yet. All entries currently live under [Unreleased].
     `Assets/Resources/PerformanceTestRun*.json` files produced by the
     performance-testing package.
 
+### Changed
+
+- **Bike speed tuning pass** — 2026-06-28
+  - Reduced the forward speed cap, downhill slope drive, and pedal acceleration
+    by 20% in both code defaults and the player prefab's serialized movement
+    tuning.
+
 ### Fixed
+
+- **Generated input wrapper EditMode cleanup** — 2026-06-28
+  - Updated generated-wrapper input asset tests to destroy the in-memory
+    `DownhillControls` asset with `DestroyImmediate` instead of calling the
+    generated `Dispose()`, which logs EditMode errors because it uses `Destroy`.
+
+- **Stopped-uphill steering lock** — 2026-06-28
+  - Allowed steering input to yaw the bike when it is stopped facing uphill, so
+    the rider can turn back toward the descent instead of being locked in place.
+
+- **Player camera recentering removed** — 2026-06-28
+  - Removed the freelook auto-recenter path from `BikeCameraController` and cleared the serialized recenter value from the tutorial scene.
+  - Added an EditMode regression check so the player camera no longer exposes a recenter speed field.
+
+- **Lint warning cleanup** — 2026-06-28
+  - Removed the current gameplay analyzer findings in the camera, debug HUD, and bike controller scripts.
+  - Excluded optional Unity AI/MCP editor tooling assemblies from the lint-only reference set to avoid unrelated `System.Net.Http` version conflicts.
+
+- **Slope camber steering & uphill ground contact** — 2026-06-28
+  - Fixed slope steering projection to turn away from steep side-elevation surfaces towards lower terrain rather than climbing them.
+  - Fixed steering lockup on uphill climbs by evaluating absolute world velocity magnitude rather than flat forward-projected speed.
+  - Fixed ground contact loss on steep hill gradients by extending `_groundProbeDistance` to `1.2m` on player prefab and instances.
+  - Fixed immediate-mode `OnGUI` conflicts with low-res URP CRT blit post-processing shader passes by rewriting the Debug HUD as a high-sorting overlay Canvas UI.
+  - Fixed undefined `"Monster"` tag exceptions by implementing a name-based fallback search (`GameObject.Find`) for the monster chase object.
+  - Cleaned up duplicate HUD components in the tutorial scene and prefab.
 
 - **Input reader PlayMode initial-state callback** — 2026-06-25
   - Changed polled controls (`FrontBrake`, `RearBrake`, `Turn`, `Freelook`) to

@@ -49,6 +49,19 @@ public class BikeSteeringModelTests
     }
 
     [Test]
+    public void StepYawDeltaDegrees_StoppedFacingUphill_AllowsRecoveryTurn()
+    {
+        BikeSteeringModel model = MakeModel();
+        Vector3 uphillNormal = new(0f, Mathf.Cos(20f * Mathf.Deg2Rad), -Mathf.Sin(20f * Mathf.Deg2Rad));
+
+        float yaw = model.StepYawDeltaDegrees(
+            Vector3.forward, Vector3.zero, 1f, uphillNormal.normalized, 0.02f);
+
+        Assert.Greater(yaw, 0f,
+            "A stopped bike facing uphill must still be able to turn back downhill.");
+    }
+
+    [Test]
     public void StepYawDeltaDegrees_InsideDeadzone_ReturnsZero()
     {
         BikeSteeringModel model = MakeModel();
@@ -84,4 +97,21 @@ public class BikeSteeringModelTests
         Assert.LessOrEqual(yaw, model.maxYawDeltaDegrees + 0.0001f);
     }
 
+    [Test]
+    public void StepYawDeltaDegrees_SlopeSteer_TurnsAwayFromStiffSlope()
+    {
+        BikeSteeringModel model = MakeModel();
+        model.slopeInfluence = 50f;
+        model.turnRateDegreesPerSecond = 0f; // test slope only
+
+        // Facing forward (+Z), flatRight is right (+X).
+        // If terrain is higher to the right, ground normal tilts to the left (-X).
+        Vector3 groundNormal = new Vector3(-0.3f, 0.95f, 0f).normalized;
+
+        float yaw = model.StepYawDeltaDegrees(
+            Vector3.forward, Vector3.forward * 5f, 0f, groundNormal, 0.02f);
+
+        // We expect it to turn to the left (negative yaw) because the steep terrain is on the right (+X).
+        Assert.Less(yaw, 0f, "Should turn left (negative yaw) away from the steep right slope.");
+    }
 }

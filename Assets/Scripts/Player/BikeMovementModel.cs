@@ -10,13 +10,13 @@ namespace Downhill.Player
     public class BikeMovementModel
     {
         [Tooltip("Forward speed cap (m/s).")]
-        public float maxSpeed = 20f;
+        public float maxSpeed = 16f;
 
         [Tooltip("Multiplier on the gravity-along-slope drive.")]
-        public float slopeDriveGain = 0.5f;
+        public float slopeDriveGain = 0.4f;
 
         [Tooltip("Forward acceleration at full pedal power (m/s^2).")]
-        public float pedalAccel = 8f;
+        public float pedalAccel = 6.4f;
 
         [Tooltip("Linear drag coefficient (per second).")]
         public float drag = 0.02f;
@@ -32,6 +32,12 @@ namespace Downhill.Player
         /// sideways slide while steering does not exist yet.
         public Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal,
                             float pedalPower01, float dt)
+        {
+            return Step(velocity, facing, groundNormal, pedalPower01, 0f, dt);
+        }
+
+        public Vector3 Step(Vector3 velocity, Vector3 facing, Vector3 groundNormal,
+                            float pedalPower01, float brakeDecel, float dt)
         {
             Vector3 forwardFlat = Vector3.ProjectOnPlane(facing, Vector3.up);
             if (forwardFlat.sqrMagnitude < 1e-6f)
@@ -58,6 +64,10 @@ namespace Downhill.Player
 
             float speed = Vector3.Dot(velocity, forwardFlat);
             speed += (slopeAccel + pedalAccelTerm) * dt;
+
+            // Apply braking deceleration
+            speed -= Mathf.Max(0f, brakeDecel) * dt;
+
             speed -= speed * drag * dt;
             speed = Mathf.Clamp(speed, 0f, maxSpeed);
 

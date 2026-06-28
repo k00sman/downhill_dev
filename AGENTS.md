@@ -133,7 +133,7 @@ package over third-party Unity-MCP bridges.
   `docs/superpowers/` so future agents can resume with context.
 - Specs go in `docs/superpowers/specs/`; plans go in `docs/superpowers/plans/`.
 - The roadmap lives in **`docs/TICKETS.md`** — the source of work. Phase order:
-  1. Input & player scaffolding → 2. Bicycle locomotion → 3. Turning, braking & camera → 4. Jumping & crash basics → 5. Health & fail states → 6. Monster chase stub → 7. Readability & instrumentation.
+  1. Input & player scaffolding → 2. Bicycle locomotion → 3. Turning, braking & camera → 4. Jumping & crash basics → 5. Health & fail states → 6. Monster chase stub → 7. Readability & instrumentation → 8. Segments & run composition → 9. Audio & atmosphere → 10. Surface & terrain handling.
 - Sprint files live in `docs/sprints/` — one file per sprint, each containing its tickets in full. **When starting a sprint, read the sprint file.** When a sprint's exit criteria are met, mark it complete at the top of the sprint file.
 - **Definition of done** (per ticket): feature works in the existing level; touched files match planned scope; acceptance criteria met; debug output is enough to tune the feature; no unrelated systems introduced silently.
 - After completing every ticket, review `AGENTS.md` and append useful lessons
@@ -155,11 +155,11 @@ package over third-party Unity-MCP bridges.
 
 ## Session learnings
 
-- For Ticket 2.1 bike locomotion, keep responsibilities split: `BikeMovementModel`
+- For Ticket 1.3 bike locomotion, keep responsibilities split: `BikeMovementModel`
   owns scalar forward-speed math and controlled grounded velocity, while
   `PlayerBikeController` owns ground probing, contact stability, Rigidbody
   wiring, and visual-only bike body pitch.
-- Keep the root Rigidbody rotation-frozen until Ticket 3.1 introduces an
+- Keep the root Rigidbody rotation-frozen until Ticket 1.4 introduces an
   explicit steering/yaw model. Terrain-driven left/right curve following should
   not be smuggled into the contact model, because normals alone can create noisy
   implicit turns on bumps, props, or banked surfaces.
@@ -185,6 +185,31 @@ package over third-party Unity-MCP bridges.
 - Validate the exact mode you ship: test `apply` (not just `--verify`), confirm
   idempotency (`./scripts/lint.sh` then `--check` from a clean tree), and read
   the diff for any file-mutating step.
+- **Slope-driven steering math**: Banked/curved slope curve following is calculated by projecting the ground normal onto the bike's flat right vector (`slopeRoll = Vector3.Dot(groundNormal, flatRight)`). Adding this multiplied by a tunable `slopeInfluence` to the yaw delta (`slopeSteer = slopeRoll * slopeInfluence`) naturally steers the bike away from steeper terrain (uphill walls) towards lower ground.
+- **Steering safety checks under extreme angles**: Govering steering availability based on the flat forward projection of velocity (`Vector3.Dot(velocity, flatForward)`) locks up steering when the bike faces uphill or turns sharply away from its sliding momentum. Always use absolute world velocity magnitude (`velocity.magnitude`) for steering minimum speed checks.
+- **Continuous ground contact on slopes**: On steep slope gradients or uphill climbs, the offset front ground probe sits higher. Ensure ground probe raycast distances are set deep enough (e.g., `1.2m` instead of `0.6m`) to prevent false "airborne" states that disable turning controls.
+- **URP Post-Processing & IMGUI conflicts**: Custom stylized blit passes (such as retro CRT/pixel-art shader scripts) can completely clear or obscure immediate-mode `OnGUI` graphics. For robust prototype HUDs, construct a `ScreenSpaceOverlay` Canvas with a high sorting order (`9999`) to guarantee UI is rendered on top of post-processing layers.
+- **External Configuration Files**: Expose player variables (like mouse/freelook `lookSensitivity`) in an external config file (e.g., `config.json` in the project root) that auto-creates itself with safe defaults on first launch. This allows testers to adjust handling without requiring Editor access.
+- **Safe Object Lookups**: Do not use `GameObject.FindWithTag` on tags that are planned but not yet officially created in Editor settings (e.g., `"Monster"`). It throws blocking exceptions that crash the script's update loop. Use safe name-based searches (`GameObject.Find`) until the tag is defined.
+- **Pedal cadence isolation**: Keep alternating-pedal timing in the pure
+  `PedalInputEvaluator` and let `PlayerBikeController` only translate input
+  events into cadence drive for the existing `PedalPower` accumulator. Trigger
+  depth remains ignored for now; the mechanic is timing-only unless a future
+  pressure-modulation ticket explicitly changes it.
+- **Input binding normalization**: When changing `DownhillControls.inputactions`,
+  update the generated `DownhillControls.cs` JSON too, then cover both the asset
+  and generated wrapper with binding assertions so runtime polling and checked-in
+  code cannot drift.
+- **Generated InputAction wrapper cleanup in EditMode tests**: Do not wrap
+  `DownhillControls` in `using` from EditMode tests. Its generated `Dispose()`
+  calls `UnityEngine.Object.Destroy`, which logs EditMode errors. Destroy the
+  generated in-memory asset with `UnityEngine.Object.DestroyImmediate` in a
+  `finally` block instead.
+- **Tuning-only number changes**: Do not add new tests just to lock numeric
+  tuning changes for existing behavior (for example bike speed, acceleration, or
+  scalar feel tweaks). Update existing tests if their expectations need to follow
+  the new tuning. Add new tests only when the tuning change introduces or fixes
+  a behavior rule.
 
 ## Game design summary
 
