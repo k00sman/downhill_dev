@@ -154,7 +154,7 @@ PlayerSettings:
   vrSettings:
     enable360StereoCapture: 0
   isWsaHolographicRemotingEnabled: 0
-  enableFrameTimingStats: 0
+  enableFrameTimingStats: 1
   enableOpenGLProfilerGPURecorders: 1
   allowHDRDisplaySupport: 0
   useHDRDisplay: 0
@@ -950,11 +950,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: f4b4c977-9a75-4aa3-ae29-630c9ec65fbc
+  cloudProjectId: 48931c0f-4501-4769-aff2-9c78493f02b3
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: downhill
-  organizationId: pkirillov
+  organizationId: lakeside-entertainment-studios
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
