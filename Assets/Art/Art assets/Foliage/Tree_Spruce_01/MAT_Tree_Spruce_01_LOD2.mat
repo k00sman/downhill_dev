@@ -116,7 +116,7 @@ Material:
     - _ColorBitDepthOffset: 0
     - _CubemapRotation: 0
     - _Cull: 0
-    - _Cutoff: 0.425
+    - _Cutoff: 0.76
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
@@ -127,7 +127,7 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _NormalOverride: 0.525
+    - _NormalOverride: 0.587
     - _NormalStrength: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
