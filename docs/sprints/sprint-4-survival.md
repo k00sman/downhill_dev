@@ -6,11 +6,11 @@
 
 ---
 
-### Ticket 5.1 - Implement hidden player health system
+### Ticket 4.1 - Implement hidden player health system
 
 **Goal:** Track survivability internally without UI complexity.
 
-**Dependencies:** Ticket 4.3.
+**Dependencies:** Ticket 3.3.
 
 **Files:**
 - `PlayerHealth`
@@ -24,18 +24,22 @@
 - Coding subagent B: implement regeneration delay and damage event handling.
 
 **Acceptance criteria:**
-- The player has current and max health.
-- Collision damage applies correctly.
-- Health regeneration starts after a no-damage delay.
-- The system supports instant death from monster contact later.
+- The player has current and max health and **starts at full** (README: health is a hidden internal value, never shown to the player).
+- Collision damage applies correctly, scaled by impact severity and speed.
+- Health regeneration starts after **5 seconds** without taking damage (README value).
+- The system supports an instant-death event (health → 0 immediately) for monster contact later.
+- Reaching 0 health triggers death.
+
+**Notes:**
+- Health is **not** shown in any player-facing UI — it is internal/hidden per the README. Surface it only on the debug HUD (Ticket 1.7).
 
 ---
 
-### Ticket 5.2 - Hook collision damage into health
+### Ticket 4.2 - Hook collision damage into health
 
 **Goal:** Turn crash severity into meaningful damage.
 
-**Dependencies:** Tickets 4.3 and 5.1.
+**Dependencies:** Tickets 3.3 and 4.1.
 
 **Files:**
 - `BikeCollisionEvaluator`
@@ -50,39 +54,46 @@
 - Coding subagent B: expose config for tuning damage values.
 
 **Acceptance criteria:**
-- Damaging crashes reduce health.
-- Fatal crashes can force immediate death.
+- Damaging crashes reduce health, scaled by impact severity and speed (README).
+- Fatal (severe) crashes can force immediate death.
 - Damage values are tunable without code changes.
+
+**Notes:**
+- Consumes the severity tiers from Ticket 3.3 — map tiers → damage here, don't re-evaluate collisions.
 
 ---
 
-### Ticket 5.3 - Implement death and quick restart loop
+### Ticket 4.3 - Implement hidden-health damage feedback
 
-**Goal:** Make failed runs restart fast enough for repeated testing.
+**Goal:** Let the player sense damage and danger without a health bar, since health is hidden.
 
-**Dependencies:** Ticket 5.1.
+**Dependencies:** Tickets 4.1 and 4.2.
 
 **Files:**
-- `PlayerDeathHandler`
-- `RunResetManager`
+- `HealthFeedbackController`
+- post-process volume / screen-effect material on the player camera
 
-**Research task for Opus:** Specify the fastest prototype restart flow that preserves iteration speed and avoids menu overhead.
+**Research task for Opus:** Specify a screen effect driven by current (hidden) health — grayscaling/desaturation plus a light vignette that intensifies as health drops and eases back as health regenerates.
 
 **Subagent tasks:**
-- Research subagent: define death flow, delays, and reset requirements.
-- Coding subagent A: implement death handling and input lockout.
-- Coding subagent B: implement level/player reset behavior.
+- Research subagent: define the health→effect mapping and how it reads health without exposing a number.
+- Coding subagent A: implement the desaturation + light vignette post-process driven by health.
+- Coding subagent B: wire it to the health system and tune thresholds and easing.
 
 **Acceptance criteria:**
-- Death transitions the player into a fail state.
-- The run can restart quickly from a known spawn state.
-- Core player systems reset cleanly.
+- As hidden health drops, the screen **desaturates toward grayscale with a light vignette**; it recovers as health regenerates.
+- The effect communicates "hurt / in danger" without ever showing a numeric or bar.
+- Intensity thresholds and easing are tunable without code changes.
+
+**Notes:**
+- This is the player's only ambient damage signal — keep it readable but restrained (light vignette) so it doesn't fight night-trail readability.
+- Reads from the same hidden health value surfaced numerically only on the debug HUD (Ticket 1.7).
 
 ---
 
 ## Sprint exit criteria
 
 Sprint 4 is complete when:
-- The player accumulates hidden health damage from crashes, dies when health reaches zero, and restarts the run quickly from spawn.
-- Damage values and regen delay are tunable without code changes.
+- The player accumulates hidden health damage from crashes (scaled by impact severity and speed), senses it through screen desaturation and a light vignette, and dies when health reaches zero — emitting the death event handled by Sprint 10.
+- Health regeneration starts after 5 seconds without damage; damage values, regen delay, and feedback thresholds are all tunable without code changes.
 - A playtester can answer: does death feel fair given the visible risk taken?

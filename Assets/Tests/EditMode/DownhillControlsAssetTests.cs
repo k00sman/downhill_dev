@@ -57,6 +57,43 @@ public class DownhillControlsAssetTests
         }
     }
 
+    [TestCase("PedalLeft", "<Mouse>/leftButton", "Keyboard&Mouse")]
+    [TestCase("PedalRight", "<Mouse>/rightButton", "Keyboard&Mouse")]
+    [TestCase("PedalLeft", "<Gamepad>/leftTrigger", "Gamepad")]
+    [TestCase("PedalRight", "<Gamepad>/rightTrigger", "Gamepad")]
+    [TestCase("FrontBrake", "<Keyboard>/w", "Keyboard&Mouse")]
+    [TestCase("RearBrake", "<Keyboard>/s", "Keyboard&Mouse")]
+    [TestCase("FrontBrake", "<Gamepad>/leftShoulder", "Gamepad")]
+    [TestCase("RearBrake", "<Gamepad>/rightShoulder", "Gamepad")]
+    public void BikeAction_UsesShippedBinding(string actionName, string expectedPath, string expectedGroup)
+    {
+        InputActionMap map = _asset.FindActionMap("Bike");
+        AssertActionHasBinding(map.FindAction(actionName), actionName, expectedPath, expectedGroup);
+    }
+
+    [TestCase("PedalLeft", "<Mouse>/leftButton", "Keyboard&Mouse")]
+    [TestCase("PedalRight", "<Mouse>/rightButton", "Keyboard&Mouse")]
+    [TestCase("PedalLeft", "<Gamepad>/leftTrigger", "Gamepad")]
+    [TestCase("PedalRight", "<Gamepad>/rightTrigger", "Gamepad")]
+    [TestCase("FrontBrake", "<Keyboard>/w", "Keyboard&Mouse")]
+    [TestCase("RearBrake", "<Keyboard>/s", "Keyboard&Mouse")]
+    [TestCase("FrontBrake", "<Gamepad>/leftShoulder", "Gamepad")]
+    [TestCase("RearBrake", "<Gamepad>/rightShoulder", "Gamepad")]
+    public void GeneratedWrapper_BikeAction_UsesShippedBinding(
+        string actionName, string expectedPath, string expectedGroup)
+    {
+        Downhill.Input.DownhillControls controls = new();
+        try
+        {
+            InputActionMap map = controls.asset.FindActionMap("Bike");
+            AssertActionHasBinding(map.FindAction(actionName), actionName, expectedPath, expectedGroup);
+        }
+        finally
+        {
+            DestroyGeneratedControls(controls);
+        }
+    }
+
     [TestCase("FrontBrake")]
     [TestCase("RearBrake")]
     [TestCase("Turn")]
@@ -77,13 +114,19 @@ public class DownhillControlsAssetTests
     [TestCase("Freelook")]
     public void GeneratedWrapper_PolledAction_DoesNotWantInitialStateCheck(string actionName)
     {
-        using Downhill.Input.DownhillControls controls = new();
+        Downhill.Input.DownhillControls controls = new();
+        try
+        {
+            InputAction action = controls.asset.FindActionMap("Bike").FindAction(actionName);
+            AssertPolledActionDoesNotWantInitialStateCheck(action, actionName);
 
-        InputAction action = controls.asset.FindActionMap("Bike").FindAction(actionName);
-        AssertPolledActionDoesNotWantInitialStateCheck(action, actionName);
-
-        string json = controls.asset.ToJson();
-        AssertPolledActionDoesNotUseInitialStateCheck(json, actionName);
+            string json = controls.asset.ToJson();
+            AssertPolledActionDoesNotUseInitialStateCheck(json, actionName);
+        }
+        finally
+        {
+            DestroyGeneratedControls(controls);
+        }
     }
 
     private static void AssertPolledActionDoesNotWantInitialStateCheck(InputAction action, string actionName)
@@ -100,5 +143,23 @@ public class DownhillControlsAssetTests
         string pattern = $"\"name\"\\s*:\\s*\"{Regex.Escape(actionName)}\"[\\s\\S]*?\"initialStateCheck\"\\s*:\\s*false";
         Assert.IsTrue(Regex.IsMatch(json, pattern),
             $"'{actionName}' is polled by PlayerInputReader.Update and should not run initial-state callbacks.");
+    }
+
+    private static void AssertActionHasBinding(
+        InputAction action, string actionName, string expectedPath, string expectedGroup)
+    {
+        Assert.IsNotNull(action, $"Action '{actionName}' missing");
+        Assert.IsTrue(action.bindings.Any(b => b.path == expectedPath
+                                              && b.groups != null
+                                              && b.groups.Contains(expectedGroup)),
+            $"'{actionName}' should bind {expectedPath} for {expectedGroup}.");
+    }
+
+    private static void DestroyGeneratedControls(Downhill.Input.DownhillControls controls)
+    {
+        if (controls.asset != null)
+        {
+            UnityEngine.Object.DestroyImmediate(controls.asset);
+        }
     }
 }

@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 4850355210995392898}
   - component: {fileID: 3369517479631482297}
   - component: {fileID: 4083079753745822618}
-  m_Layer: 3
+  - component: {fileID: 3816296678916602138}
+  m_Layer: 0
   m_Name: PFB_Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -119,10 +120,11 @@ MonoBehaviour:
   _groundCheck: {fileID: 4961183217523439498}
   _recoveryAnchor: {fileID: 8220739475990105250}
   _movement:
-    maxSpeed: 20
-    slopeDriveGain: 0.5
-    pedalAccel: 8
+    maxSpeed: 10.88
+    slopeDriveGain: 0.272
+    pedalAccel: 2.56
     drag: 0.02
+    lateralGrip: 6
     gravity: 9.81
     maxGroundedUpSpeed: 0.75
   _steering:
@@ -130,17 +132,48 @@ MonoBehaviour:
     maxYawDeltaDegrees: 8
     minSpeedForSteering: 0.5
     turnDeadzone: 0.15
+    slopeInfluence: 24
+    slopeSteerResponse: 6
+    velocityAlignmentMinSpeed: 0.5
+    velocityAlignmentYawRateDegreesPerSecond: 45
+    lowSpeedDownhillAlignmentYawRateDegreesPerSecond: 70
+    downhillAlignmentMinSlopeDegrees: 5
+    headingAlignmentDeadzoneDegrees: 3
+    frontBrakeAlignmentSuppressionThreshold: 0.1
+  _brake:
+    frontBrakePower: 12
+    rearBrakePower: 8
   _groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  _groundProbeDistance: 0.6
+  _groundProbeDistance: 1.2
   _groundProbeForwardOffset: 0.75
   _groundProbeRearOffset: 0.75
   _terrainPitchLerp: 12
   _maxVisualPitchDegrees: 55
-  _pedalImpulse: 0.5
+  _pedalInput:
+    cadenceWindowSeconds: 0.45
+    basePressDrive: 0.06
+    alternatingDriveBonus: 0.2
+    sameSideDrive: 0.01
+    useSinglePedalFallback: 0
+    fallbackDrive: 0.14
   _pedalPowerMax: 1
   _pedalDecayPerSec: 0.8
+--- !u!114 &3816296678916602138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511561621724766687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47dff9f6b55d487a4804fd7dd65bb072, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Downhill.Player::Downhill.Player.GameplayDebugHUD
+  _player: {fileID: 4083079753745822618}
+  _showHUD: 1
 --- !u!1 &4789164619254481586
 GameObject:
   m_ObjectHideFlags: 0
@@ -150,7 +183,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8220739475990105250}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: RecoveryAnchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -181,7 +214,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2501742042593412731}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: BikeBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -213,7 +246,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4961183217523439498}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,7 +279,7 @@ GameObject:
   - component: {fileID: 3333630535953238800}
   - component: {fileID: 2005343711384805236}
   - component: {fileID: 2642402523610728278}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -371,7 +404,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6408316767420572746}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -449,25 +482,13 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: e619e75e5caface4d813a9001c1a8009, type: 2}
-    - target: {fileID: -4067772899192058470, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: -1005299851024752360, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 48302867535e1b745b135ceec46f628e, type: 2}
-    - target: {fileID: 154115235193087444, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
       propertyPath: m_Name
       value: MSH_BikeDefault
-      objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
-      propertyPath: m_Layer
-      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5300391455597827356, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -477,14 +498,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 48302867535e1b745b135ceec46f628e, type: 2}
-    - target: {fileID: 7839798466891876103, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8370419871001657780, guid: 1917fd25cdc61f842929617d16c89bab, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

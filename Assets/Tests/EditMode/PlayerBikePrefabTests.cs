@@ -1,3 +1,4 @@
+using System.Reflection;
 using Downhill.Input;
 using Downhill.Player;
 using NUnit.Framework;
@@ -73,5 +74,16 @@ public class PlayerBikePrefabTests
         SerializedProperty prop = so.FindProperty(fieldName);
         Assert.IsNotNull(prop, $"Serialized field '{fieldName}' not found");
         Assert.IsNotNull(prop.objectReferenceValue, $"Serialized field '{fieldName}' is not wired");
+    }
+
+    [Test]
+    public void BikeCameraController_DoesNotExposeRecenterSpeed()
+    {
+        FieldInfo field = typeof(BikeCameraController).GetField(
+            "_recenterSpeed",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+        Assert.IsNull(field,
+            "Player camera freelook should stay where the player leaves it instead of exposing automatic recentering.");
     }
 }

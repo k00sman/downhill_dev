@@ -121,3 +121,5 @@ tools/*/obj/
 tools/lint/Local.props
 tools/lint/obj/
 tools/lint/bin/
+
+superpowers
