@@ -13,6 +13,16 @@ public class PlayerInputReaderTests : InputTestFixture
     public override void Setup()
     {
         base.Setup();
+        // Unity 6 enables project-wide input actions during PlayMode test setup.
+        // PlayerInputReader polls controls directly and never enables these, so
+        // disable the default Value actions to stop them scheduling initial-state
+        // callbacks that throw ArgumentNullException (statePtr) during the device
+        // churn in these tests.
+        InputActionAsset projectWideActions = InputSystem.actions;
+        if (projectWideActions != null)
+        {
+            projectWideActions.Disable();
+        }
     }
 
     [TearDown]

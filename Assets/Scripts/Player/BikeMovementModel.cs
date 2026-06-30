@@ -44,6 +44,12 @@ namespace Downhill.Player
         [Tooltip("Forward acceleration at full pedal power (m/s^2).")]
         public float pedalAccel = 2.56f;
 
+        [Tooltip("Pedal-accel multiplier at a standstill; fades to 1.0 by lowSpeedBoostFadeSpeed.")]
+        public float lowSpeedPedalBoost = 1.15f;
+
+        [Tooltip("Speed (m/s) at which the low-speed pedal boost has fully faded to 1.0x (~30% of maxSpeed).")]
+        public float lowSpeedBoostFadeSpeed = 3.26f;
+
         [Tooltip("Linear drag coefficient (per second).")]
         public float drag = 0.02f;
 
@@ -91,7 +97,13 @@ namespace Downhill.Player
                 horizontalVelocity += slopeAcceleration * dt;
             }
 
-            Vector3 pedalAcceleration = forwardFlat * (Mathf.Clamp01(pedalPower01) * Mathf.Max(0f, pedalAccel));
+            float pedalSpeed = horizontalVelocity.magnitude;
+            float boostT = lowSpeedBoostFadeSpeed > 0f
+                ? Mathf.Clamp01(pedalSpeed / lowSpeedBoostFadeSpeed)
+                : 1f;
+            float lowSpeedBoost = Mathf.Lerp(Mathf.Max(1f, lowSpeedPedalBoost), 1f, boostT);
+            Vector3 pedalAcceleration = forwardFlat
+                * (Mathf.Clamp01(pedalPower01) * Mathf.Max(0f, pedalAccel) * lowSpeedBoost);
             horizontalVelocity += pedalAcceleration * dt;
 
             horizontalVelocity = ApplyBrake(horizontalVelocity, brakeDecel, dt);

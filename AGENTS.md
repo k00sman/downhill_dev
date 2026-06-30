@@ -113,9 +113,12 @@ menu (Claude Code sets a subagent's model; Codex selects per session).
 
 An optional **official Unity MCP** server (`com.unity.ai.assistant`) lets agents
 inspect a running Editor — scenes, GameObjects, console, screenshots. It is
-**Editor-open only** — not a headless/CI path. The official package exposes **no
-test-runner tool**, so run tests from the Unity Test Runner window (above), not
-via MCP. Three safety layers apply: Unity's per-client connection approval (Accept
+**Editor-open only** — not a headless/CI path. The official package exposes no
+*dedicated* test-runner tool, but `Unity_RunCommand` can compile and invoke
+`TestRunnerApi` to run the EditMode suite and read results back from
+`TestResults.xml` (used successfully this session — see Session learnings). For
+PlayMode (it enters Play mode) and whenever MCP is unavailable, run tests from
+the Unity Test Runner window (above). Three safety layers apply: Unity's per-client connection approval (Accept
 under `Edit > Project Settings > AI > Unity MCP`), Unity's per-tool enable/disable
 toggle (it ships with a command-runner and a mutator **on** — curate down to
 read-only), and our per-call gating in `docs/playbooks/unity-mcp-allowlist.md`
@@ -223,12 +226,35 @@ package over third-party Unity-MCP bridges.
   that schedule initial-state callbacks. Physics tests that inherit
   `InputTestFixture` but do not exercise project-wide actions should disable
   them in `Setup()` with an explicit Unity-object null check before spawning
-  gameplay prefabs.
+  gameplay prefabs. This applies to **any** `InputTestFixture` fixture that does
+  not itself enable those actions — **not just physics tests**. Device-polling
+  input tests qualify too: `PlayerInputReaderTests` polls controls via
+  `InputSystem.FindControls` and never enables the actions, so it hit the same
+  `ArgumentNullException: statePtr` in `InputActionState.OnBeforeInitialUpdate`
+  (symptom surfaced on `FrontBrake_ReflectsLeftShoulder`). Mirror the
+  `InputSystem.actions?.Disable()` guard into every such fixture's `Setup()`.
 - **Tuning-only number changes**: Do not add new tests just to lock numeric
   tuning changes for existing behavior (for example bike speed, acceleration, or
   scalar feel tweaks). Update existing tests if their expectations need to follow
   the new tuning. Add new tests only when the tuning change introduces or fixes
-  a behavior rule.
+  a behavior rule. (The Ticket 2.1 low-speed pedal boost added tests because it
+  introduced a *new rule* — speed-dependent acceleration that fades above a
+  threshold — not merely a scalar tweak.)
+- **Running EditMode tests via Unity MCP**: With the Editor open and MCP
+  connected, `Unity_RunCommand` can compile and invoke `TestRunnerApi` to run
+  the EditMode suite, writing NUnit results to
+  `~/.config/unity3d/<Company>/<Project>/TestResults.xml` (Linux) to read back.
+  Confirmed this session (16/16 EditMode). PlayMode enters Play mode and
+  disrupts a live Editor, so prefer asking the user for those; never claim a
+  pass you did not actually observe in the results file.
+- **New serialized fields on embedded `[Serializable]` models**: Adding a public
+  field to a pure model like `BikeMovementModel` (held as a `[SerializeField]`
+  on a prefab/scene component, e.g. `PFB_Player.prefab`) does **not** write into
+  the existing prefab/scene YAML until that asset is re-opened and saved in the
+  Editor. At runtime Unity backfills the missing field from the C# initializer,
+  so play uses the right value — but the prefab Inspector/YAML won't reflect it
+  until re-saved. After adding a tunable, verify it in the Inspector (and save
+  the prefab if you want the value overridable there).
 
 ## Game design summary
 
