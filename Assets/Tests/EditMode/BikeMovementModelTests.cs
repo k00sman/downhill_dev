@@ -214,6 +214,49 @@ public class BikeMovementModelTests
     }
 
     [Test]
+    public void Flat_Pedalling_FromZero_AppliesLowSpeedBoost()
+    {
+        BikeMovementModel boosted = MakeModel();
+        boosted.lowSpeedPedalBoost = 1.15f;
+        boosted.lowSpeedBoostFadeSpeed = 3.26f;
+
+        BikeMovementModel unboosted = MakeModel();
+        unboosted.lowSpeedPedalBoost = 1f;
+        unboosted.lowSpeedBoostFadeSpeed = 3.26f;
+
+        float boostedFwd = Vector3.Dot(
+            boosted.Step(Vector3.zero, Vector3.forward, Vector3.up, 1f, 0.02f), Vector3.forward);
+        float unboostedFwd = Vector3.Dot(
+            unboosted.Step(Vector3.zero, Vector3.forward, Vector3.up, 1f, 0.02f), Vector3.forward);
+
+        Assert.Greater(unboostedFwd, 0f, "Sanity: unboosted bike should still accelerate from rest.");
+        Assert.AreEqual(1.15f, boostedFwd / unboostedFwd, 0.02f,
+            "From a standstill the boosted pedal accel should be ~1.15x the unboosted accel.");
+    }
+
+    [Test]
+    public void Flat_Pedalling_AboveFadeSpeed_NoBoost()
+    {
+        BikeMovementModel boosted = MakeModel();
+        boosted.lowSpeedPedalBoost = 1.15f;
+        boosted.lowSpeedBoostFadeSpeed = 3.26f;
+
+        BikeMovementModel unboosted = MakeModel();
+        unboosted.lowSpeedPedalBoost = 1f;
+        unboosted.lowSpeedBoostFadeSpeed = 3.26f;
+
+        Vector3 start = Vector3.forward * 5f; // above lowSpeedBoostFadeSpeed
+
+        float boostedFwd = Vector3.Dot(
+            boosted.Step(start, Vector3.forward, Vector3.up, 1f, 0.02f), Vector3.forward);
+        float unboostedFwd = Vector3.Dot(
+            unboosted.Step(start, Vector3.forward, Vector3.up, 1f, 0.02f), Vector3.forward);
+
+        Assert.AreEqual(unboostedFwd, boostedFwd, 1e-4f,
+            "Above the fade speed the boost must be fully faded to 1.0x (no top-end change).");
+    }
+
+    [Test]
     public void DegenerateHeading_ReturnsInputVelocity()
     {
         BikeMovementModel m = MakeModel();
